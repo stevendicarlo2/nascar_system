@@ -40,8 +40,15 @@ async function showNascarData() {
       var teamName = tableDataRows[i].getElementsByClassName("teamName truncate")[0].getAttribute("title");
       var score = scores.scores[teamName] || 0;
       
-      // var wins = tableDataRows[i].getElementsByClassName("wins__column")[0].innerHTML;
-      var wins = 0;
+      var winColumn = tableDataRows[i].getElementsByClassName("wins__column");
+      var wins;
+      if (winColumn.length === 0) {
+        var recordColumn = tableDataRows[i].children[2]
+        wins = recordColumn.children[0].innerHTML;
+        wins = wins.substr(0, wins.indexOf('-'));
+      } else {
+        wins = winColumn[0].innerHTML;
+      }
       
       let child = document.createElement('th');
       child.classList.add("Table2__td");
