@@ -42,7 +42,8 @@ async function showNascarData() {
         var owner = names.names[teamName.replace("  ", " ")];
         var score = scores.scores[owner] || 0;
         
-        var wins = tableDataRows[i].getElementsByClassName("wins__column")[0].innerHTML;
+        // var wins = tableDataRows[i].getElementsByClassName("wins__column")[0].innerHTML;
+        var wins = 0;
         
         let child = document.createElement('th');
         child.classList.add("Table2__td");
