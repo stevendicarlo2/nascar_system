@@ -6,6 +6,23 @@ function getCookies(domain, name, callback) {
     }
   });
 }
+var tabID;
+
+chrome.webNavigation.onBeforeNavigate.addListener(function() {
+
+  getCookies("https://fantasy.espn.com", "kona_v3_environment_season_ffl", function(value) {
+      let cookieInfo = JSON.parse(value);
+      let seasonId = cookieInfo["seasonId"] || 2019;
+      let leagueId = cookieInfo["leagueId"];
+      let scheduleURL = "https://fantasy.espn.com/football/league/schedule?leagueId=" + leagueId.toString() + "&seasonId=" + seasonId.toString();
+      chrome.tabs.create({ url: scheduleURL, active: false }, function (tab) {
+        tabID = tab.id;
+        chrome.tabs.executeScript(tab.id, {
+          file: "getScheduleData.js"
+        });
+      });
+  });
+}, {url: [{urlMatches : 'https://fantasy.espn.com/football/league/standings*'}]});
 
 chrome.runtime.onMessage.addListener(
   function(request, sender, sendResponse) {
@@ -33,23 +50,11 @@ chrome.runtime.onMessage.addListener(
       chrome.storage.sync.set({"scores": scores}, function() {
         console.log('Scores has been set to ' + JSON.stringify(scores));
       });
+      chrome.tabs.remove(tabID);
     }
   });
 
-chrome.webNavigation.onBeforeNavigate.addListener(function() {
 
-  getCookies("https://fantasy.espn.com", "kona_v3_environment_season_ffl", function(value) {
-      let cookieInfo = JSON.parse(value);
-      let seasonId = cookieInfo["seasonId"] || 2019;
-      let leagueId = cookieInfo["leagueId"];
-      let scheduleURL = "https://fantasy.espn.com/football/league/schedule?leagueId=" + leagueId.toString() + "&seasonId=" + seasonId.toString();
-      chrome.tabs.create({ url: scheduleURL, active: false }, function (tab) {
-        chrome.tabs.executeScript(tab.id, {
-          file: "getScheduleData.js"
-        });
-      });
-  });
-}, {url: [{urlMatches : 'https://fantasy.espn.com/football/league/standings*'}]});
 
 
 chrome.webNavigation.onCompleted.addListener(function() {
