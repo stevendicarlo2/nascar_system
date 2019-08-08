@@ -10,12 +10,32 @@ async function getData() {
     await sleep(500);
     weeks = document.getElementsByClassName("matchup--table");
   }
-  console.log(weeks.length);
-  console.log(weeks);
+  var scoreData = {}
   for (var i=0; i<weeks.length; i++) {
     var week = weeks[i];
-    console.log(week);
+    var weekName = week.getElementsByClassName("table-caption dib")[0].innerHTML;
+    if (weekName.includes("Playoff")) {
+      continue;
+    }
+    // console.log(week);
+    var weekData = {}
+    var tableBody = week.getElementsByClassName("Table2__tbody")[0];
+    var teamNames = tableBody.getElementsByClassName("teamName truncate");
+    var weekScores = tableBody.getElementsByClassName("result-column");
+    // console.log(teamNames.length);
+    // console.log(weekScores.length);
+    
+    for (var j=0; j<teamNames.length; j++) {
+      var name = teamNames[j].getAttribute("title");
+      var score = weekScores[j].getElementsByClassName("link")[0].innerHTML;
+      // console.log(name);
+      // console.log(score);
+      weekData[name] = parseFloat(score);
+    }
+    console.log(weekData);
+    scoreData[i] = weekData
   }
+  console.log(scoreData);
   
   
   
@@ -25,7 +45,8 @@ async function getData() {
   // });
   console.log("sending message");
   chrome.runtime.sendMessage({
-    action: "hello"
+    scores: scoreData,
+    action: "getScores"
   });
 };
 
