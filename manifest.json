@@ -1,7 +1,7 @@
 {
-    "name": "Getting Started Example",
+    "name": "NASCAR Fantasy football scoring",
     "version": "1.0",
-    "description": "Build an Extension!",
+    "description": "A better way to play fantasy",
     "permissions": ["storage"],
     "background": {
       "scripts": ["jquery-3.4.1.min.js", "background.js"],
