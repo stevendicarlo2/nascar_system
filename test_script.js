@@ -63,9 +63,14 @@ async function showNascarData() {
     }
 
   });
-  document.getElementsByClassName("btn standings_page_regular_season")[0].addEventListener("click", showNascarData);
-  document.getElementsByClassName("btn standings_page_final_standings")[0].addEventListener("click", showNascarData);
-
+  var regularSeasonButton = document.getElementsByClassName("btn standings_page_regular_season");
+  if (regularSeasonButton.length !== 0) {
+    regularSeasonButton[0].addEventListener("click", showNascarData);
+  }
+  var finalStandingsButton = document.getElementsByClassName("btn standings_page_final_standings");
+  if (finalStandingsButton.length !== 0) {
+    finalStandingsButton[0].addEventListener("click", showNascarData);
+  }
 }
 
 window.onload = showNascarData;

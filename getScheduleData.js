@@ -25,15 +25,26 @@ async function getData() {
     // console.log(teamNames.length);
     // console.log(weekScores.length);
     
+    var includeWeek = false;
     for (var j=0; j<teamNames.length; j++) {
       var name = teamNames[j].getAttribute("title");
-      var score = weekScores[j].getElementsByClassName("link")[0].innerHTML;
+      var score = weekScores[j].getElementsByClassName("link");
+      if (score.length === 0) {
+        continue;
+      } else {
+        score = score[0].innerHTML;
+        if (score != 0) {
+          includeWeek = true;
+        }
+      }
       // console.log(name);
       // console.log(score);
       weekData[name] = parseFloat(score);
     }
     console.log(weekData);
-    scoreData[i] = weekData
+    if (includeWeek) {
+      scoreData[i] = weekData;
+    }
   }
   console.log(scoreData);
   
