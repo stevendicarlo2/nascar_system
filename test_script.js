@@ -19,8 +19,13 @@ async function showNascarData() {
     // }
     var child = document.createElement('th');
     child.classList.add("Table2__th");
-    child.innerHTML = '<th title="" class="Table2__th"><div title="NASCAR Points" class="jsx-2810852873 table--cell header"><span>NP</span></div></th>';
+    child.innerHTML = '<div title="NASCAR Points" class="jsx-2810852873 table--cell header"><span>NP</span></div>';
     tableHeaders[i].appendChild(child);
+    
+    var child2 = document.createElement('th');
+    child2.classList.add("Table2__th");
+    child2.innerHTML = '<div title="Adjusted NASCAR Points" class="jsx-2810852873 table--cell header"><span>ANP</span></div>';
+    tableHeaders[i].appendChild(child2);
   }
 
   
@@ -38,12 +43,17 @@ async function showNascarData() {
         var score = scores.scores[owner] || 0;
         
         var wins = tableDataRows[i].getElementsByClassName("wins__column")[0].innerHTML;
-        score = score + wins*7;
         
         let child = document.createElement('th');
         child.classList.add("Table2__td");
         child.innerHTML = '<div title="NASCAR Points" class="jsx-2810852873 table--cell fw-bold">' + score.toString() + '</div>';
         tableDataRows[i].appendChild(child);
+        
+        let child2 = document.createElement('th');
+        child2.classList.add("Table2__td");
+        child2.innerHTML = '<div title="Adjusted NASCAR Points" class="jsx-2810852873 table--cell fw-bold">' + (score + wins*7).toString() + '</div>';
+        tableDataRows[i].appendChild(child2);
+
       }
     });
 
