@@ -4,7 +4,7 @@
     "description": "Build an Extension!",
     "permissions": ["storage"],
     "background": {
-      "scripts": ["background.js"],
+      "scripts": ["jquery-3.4.1.min.js", "background.js"],
       "persistent": false
     },
     "content_scripts": [
