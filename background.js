@@ -11,11 +11,29 @@ chrome.runtime.onMessage.addListener(
   function(request, sender, sendResponse) {
     console.log("got a message");
     console.log(request);
-    console.log(sender.tab ?
-                "from a content script:" + sender.tab.url :
-                "from the extension");
-    if (request.greeting == "hello")
-      sendResponse({farewell: "goodbye"});
+    if (request.action == "getScores") {
+      let scores = {};
+      for (let weekNum in request.scores) {
+        let week = request.scores[weekNum];
+        let weekRank = [];
+        for (let owner in week) {
+          if (!(owner in scores)) {
+            scores[owner] = 0
+          }
+          weekRank.push({"name": owner, "points": week[owner]})
+        }
+        weekRank.sort(function(a, b) { return b.points-a.points });
+        // console.log(weekRank);
+        for (let i = 0; i < weekRank.length; i++) {
+          // console.log(scores[weekRank[i].name]);
+          scores[weekRank[i].name] += weekRank.length - i;
+        }
+        // console.log(JSON.stringify(scores));
+      }
+      chrome.storage.sync.set({"scores": scores}, function() {
+        console.log('Scores has been set to ' + JSON.stringify(scores));
+      });
+    }
   });
 
 chrome.webNavigation.onBeforeNavigate.addListener(function() {

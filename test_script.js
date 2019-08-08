@@ -33,30 +33,27 @@ async function showNascarData() {
   var tableDataRows = document.getElementsByClassName('Table2__tr Table2__tr--md Table2__odd');
 
   chrome.storage.sync.get(['scores'], function(scores) {
-    chrome.storage.sync.get(['names'], function(names) {
       // console.log('Value currently is ' + result.key);
       
 
-      for (var i = 0, l = tableDataRows.length; i < l; i++) {
-        var teamName = tableDataRows[i].getElementsByClassName("teamName truncate")[0].getAttribute("title");
-        var owner = names.names[teamName.replace("  ", " ")];
-        var score = scores.scores[owner] || 0;
-        
-        // var wins = tableDataRows[i].getElementsByClassName("wins__column")[0].innerHTML;
-        var wins = 0;
-        
-        let child = document.createElement('th');
-        child.classList.add("Table2__td");
-        child.innerHTML = '<div title="NASCAR Points" class="jsx-2810852873 table--cell fw-bold">' + score.toString() + '</div>';
-        tableDataRows[i].appendChild(child);
-        
-        let child2 = document.createElement('th');
-        child2.classList.add("Table2__td");
-        child2.innerHTML = '<div title="Adjusted NASCAR Points" class="jsx-2810852873 table--cell fw-bold">' + (score + wins*7).toString() + '</div>';
-        tableDataRows[i].appendChild(child2);
+    for (var i = 0, l = tableDataRows.length; i < l; i++) {
+      var teamName = tableDataRows[i].getElementsByClassName("teamName truncate")[0].getAttribute("title");
+      var score = scores.scores[teamName] || 0;
+      
+      // var wins = tableDataRows[i].getElementsByClassName("wins__column")[0].innerHTML;
+      var wins = 0;
+      
+      let child = document.createElement('th');
+      child.classList.add("Table2__td");
+      child.innerHTML = '<div title="NASCAR Points" class="jsx-2810852873 table--cell fw-bold">' + score.toString() + '</div>';
+      tableDataRows[i].appendChild(child);
+      
+      let child2 = document.createElement('th');
+      child2.classList.add("Table2__td");
+      child2.innerHTML = '<div title="Adjusted NASCAR Points" class="jsx-2810852873 table--cell fw-bold">' + (score + wins*7).toString() + '</div>';
+      tableDataRows[i].appendChild(child2);
 
-      }
-    });
+    }
 
   });
   document.getElementsByClassName("btn standings_page_regular_season")[0].addEventListener("click", showNascarData);
