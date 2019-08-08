@@ -1,0 +1,152 @@
+{
+  "scores" : {
+    "year" : {
+      "2018-19" : {
+        "week_1" : {
+          "alex" : 126.1,
+          "danny" : 95.8,
+          "dev" : 112.6,
+          "ethan" : 132.1,
+          "fonti" : 135.6,
+          "max" : 66.9,
+          "mike" : 115.4,
+          "moose" : 119.9,
+          "popper" : 127.8,
+          "steven" : 103.6
+        },
+        "week_2" : {
+          "alex" : 157.6,
+          "danny" : 79.8,
+          "dev" : 124.4,
+          "ethan" : 126.7,
+          "fonti" : 107.6,
+          "max" : 95.9,
+          "mike" : 79.8,
+          "moose" : 136.2,
+          "popper" : 107.8,
+          "steven" : 136.1
+        },
+        "week_3" : {
+          "alex" : 110.4,
+          "danny" : 97.6,
+          "dev" : 123.2,
+          "ethan" : 128.9,
+          "fonti" : 115.6,
+          "max" : 95.9,
+          "mike" : 67.5,
+          "moose" : 84.1,
+          "popper" : 127.5,
+          "steven" : 130.8
+        },
+        "week_4" : {
+          "alex" : 134.2,
+          "danny" : 104.9,
+          "dev" : 85.2,
+          "ethan" : 154,
+          "fonti" : 96.4,
+          "max" : 76.5,
+          "mike" : 94.1,
+          "moose" : 111.6,
+          "popper" : 80.4,
+          "steven" : 149.9
+        },
+        "week_5" : {
+          "alex" : 97.5,
+          "danny" : 104.8,
+          "dev" : 118.8,
+          "ethan" : 126.8,
+          "fonti" : 130.5,
+          "max" : 77.5,
+          "mike" : 111.7,
+          "moose" : 89.4,
+          "popper" : 123.6,
+          "steven" : 85.7
+        },
+        "week_6" : {
+          "alex" : 149.6,
+          "danny" : 125.9,
+          "dev" : 77.2,
+          "ethan" : 133.5,
+          "fonti" : 134,
+          "max" : 43.3,
+          "mike" : 149.2,
+          "moose" : 87.8,
+          "popper" : 104,
+          "steven" : 128.6
+        },
+        "week_7" : {
+          "alex" : 128.1,
+          "danny" : 113.4,
+          "dev" : 125.1,
+          "ethan" : 107.9,
+          "fonti" : 126.5,
+          "max" : 39.1,
+          "mike" : 76.3,
+          "moose" : 116.8,
+          "popper" : 112,
+          "steven" : 87
+        },
+        "week_8" : {
+          "alex" : 108.9,
+          "danny" : 88.3,
+          "dev" : 126.6,
+          "ethan" : 130.5,
+          "fonti" : 152.6,
+          "max" : 105.6,
+          "mike" : 116.6,
+          "moose" : 102.2,
+          "popper" : 129.5,
+          "steven" : 126.9
+        },
+        "week_9" : {
+          "alex" : 123.1,
+          "danny" : 88.7,
+          "dev" : 134.3,
+          "ethan" : 145.6,
+          "fonti" : 93.6,
+          "max" : 82.9,
+          "mike" : 89.1,
+          "moose" : 122.1,
+          "popper" : 116,
+          "steven" : 164.8
+        },
+        "week_10" : {
+          "alex" : 132.1,
+          "danny" : 75.5,
+          "dev" : 117.1,
+          "ethan" : 94.6,
+          "fonti" : 108.8,
+          "max" : 121.1,
+          "mike" : 75.8,
+          "moose" : 88.7,
+          "popper" : 140.3,
+          "steven" : 177
+        },
+        "week_11" : {
+          "alex" : 121.2,
+          "danny" : 103.8,
+          "dev" : 121.3,
+          "ethan" : 96.2,
+          "fonti" : 138.5,
+          "max" : 95.8,
+          "mike" : 99.4,
+          "moose" : 109.1,
+          "popper" : 148,
+          "steven" : 169.6
+        },
+        "week_12" : {
+          "alex" : 123,
+          "danny" : 95.2,
+          "dev" : 110.8,
+          "ethan" : 105.2,
+          "fonti" : 106.7,
+          "max" : 153.3,
+          "mike" : 112.4,
+          "moose" : 100.5,
+          "popper" : 81.5,
+          "steven" : 157.8
+        }
+      }
+    }
+  }
+}
