@@ -2,7 +2,7 @@
     "name": "NASCAR Fantasy football scoring",
     "version": "1.0",
     "description": "A better way to play fantasy",
-    "permissions": ["storage"],
+    "permissions": ["storage", "webNavigation"],
     "background": {
       "scripts": ["jquery-3.4.1.min.js", "background.js"],
       "persistent": false

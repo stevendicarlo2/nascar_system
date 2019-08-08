@@ -1,5 +1,8 @@
+chrome.webNavigation.onCompleted.addListener(function() {
+
+
 $.ajax({
-  url: 'https://nascar-scoring.firebaseio.com/scores/year/2018-19.json',
+  url: 'https://nascar-scoring.firebaseio.com/scores/year/2019-20.json',
   crossDomain: true,
   success: function (info) {
     // console.log(info);
@@ -43,3 +46,6 @@ $.ajax({
     console.log(error);
   }
 });
+
+}, {url: [{urlMatches : 'https://fantasy.espn.com/football/league/standings*'}]});
+
