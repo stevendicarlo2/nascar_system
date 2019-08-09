@@ -48,12 +48,6 @@ async function getData() {
   }
   console.log(scoreData);
   
-  
-  
-  // chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-  // chrome.tabs.sendMessage(tabs[0].id, {greeting: "hello"}, function(response) {
-  //   console.log(response.farewell);
-  // });
   console.log("sending message");
   chrome.runtime.sendMessage({
     scores: scoreData,
@@ -63,11 +57,3 @@ async function getData() {
 
 
 getData();
-
-// matchup--table
-// 
-// Table2__tr Table2__tr--md Table2__odd
-// 
-// teamName truncate
-// 
-// result-column
