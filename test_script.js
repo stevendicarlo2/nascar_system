@@ -13,10 +13,10 @@ async function showNascarData() {
   for (var i = 0, l = tableHeaders.length; i < l; i++) {
     console.log(tableHeaders[i]);
     // console.log(tableHeaders[i].innerHTML);
-    // if (tableHeaders[i].innerHTML.includes("NASCAR")) {
-    //   console.log("here3");
-    //   continue;
-    // }
+    if (tableHeaders[i].innerHTML.includes("NASCAR")) {
+      console.log("here3");
+      continue;
+    }
     var child = document.createElement('th');
     child.classList.add("Table2__th");
     child.innerHTML = '<div title="NASCAR Points" class="jsx-2810852873 table--cell header"><span>NP</span></div>';
@@ -50,15 +50,25 @@ async function showNascarData() {
         wins = winColumn[0].innerHTML;
       }
       
-      let child = document.createElement('th');
-      child.classList.add("Table2__td");
-      child.innerHTML = '<div title="NASCAR Points" class="jsx-2810852873 table--cell fw-bold">' + score.toString() + '</div>';
-      tableDataRows[i].appendChild(child);
+      var NPChild = tableDataRows[i].querySelector("#NP"+i.toString())
+      if (NPChild) {
+        NPChild.innerHTML = score.toString();
+      } else {
+        let child = document.createElement('th');
+        child.classList.add("Table2__td");
+        child.innerHTML = '<div id="NP'+i.toString()+'" title="NASCAR Points" class="jsx-2810852873 table--cell fw-bold">' + score.toString() + '</div>';
+        tableDataRows[i].appendChild(child);
+      }
       
-      let child2 = document.createElement('th');
-      child2.classList.add("Table2__td");
-      child2.innerHTML = '<div title="Adjusted NASCAR Points" class="jsx-2810852873 table--cell fw-bold">' + (score + wins*7).toString() + '</div>';
-      tableDataRows[i].appendChild(child2);
+      var ANPChild = tableDataRows[i].querySelector("#ANP"+i.toString())
+      if (ANPChild) {
+        ANPChild.innerHTML = (score + wins*7).toString();
+      } else {
+        let child2 = document.createElement('th');
+        child2.classList.add("Table2__td");
+        child2.innerHTML = '<div id="ANP'+i.toString()+'" title="Adjusted NASCAR Points" class="jsx-2810852873 table--cell fw-bold">' + (score + wins*7).toString() + '</div>';
+        tableDataRows[i].appendChild(child2);
+      }
 
     }
 
