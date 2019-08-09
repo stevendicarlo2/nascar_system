@@ -26,26 +26,30 @@ chrome.runtime.onMessage.addListener(
       openWorkerTab(request.year);
     }
     if (request.action === "getScores") {
-      let scores = {};
+      let scoreData = {"weekly_breakdown": request.scores, "totals": {}};
       for (let weekNum in request.scores) {
         let week = request.scores[weekNum];
         let weekRank = [];
         for (let owner in week) {
-          if (!(owner in scores)) {
-            scores[owner] = 0
+          if (!(owner in scoreData.totals)) {
+            scoreData.totals[owner] = {"total_NP": 0, "wins": 0};
           }
-          weekRank.push({"name": owner, "points": week[owner]})
+          weekRank.push({"name": owner, "score": week[owner].score, "wins": week[owner].wins})
         }
-        weekRank.sort(function(a, b) { return b.points-a.points });
+        weekRank.sort(function(a, b) { return b.score-a.score });
         // console.log(weekRank);
         for (let i = 0; i < weekRank.length; i++) {
           // console.log(scores[weekRank[i].name]);
-          scores[weekRank[i].name] += weekRank.length - i;
+          let nascar_points = weekRank.length - i;
+          scoreData.weekly_breakdown[weekNum][weekRank[i].name].nascar_points = nascar_points;
+          scoreData.totals[weekRank[i].name].total_NP += nascar_points;
+          scoreData.totals[weekRank[i].name].wins += weekRank[i].wins;
         }
         // console.log(JSON.stringify(scores));
       }
-      chrome.storage.sync.set({"scores": scores}, function() {
-        console.log('Scores has been set to ' + JSON.stringify(scores));
+      chrome.storage.local.set({"scoreData": scoreData}, function() {
+        console.log('scoreData has been set:');
+        console.log(scoreData);
         chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
           chrome.tabs.sendMessage(tabs[0].id,{ action: "refreshScores" });
         });

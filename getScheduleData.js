@@ -32,14 +32,21 @@ async function getData() {
       if (score.length === 0) {
         continue;
       } else {
-        score = score[0].innerHTML;
-        if (score != 0) {
+        score = parseFloat(score[0].innerHTML);
+        if (score !== 0) {
           includeWeek = true;
         }
+        var oppIndex = (j%2 === 0) ? j+1 : j-1;
+        var oppScore = parseFloat(weekScores[oppIndex].getElementsByClassName("link")[0].innerHTML);
+        var wins;
+        if (score > oppScore) { wins = 1; }
+        else if (score < oppScore) { wins = 0; }
+        else { wins = .5; }
+        
       }
       // console.log(name);
       // console.log(score);
-      weekData[name] = parseFloat(score);
+      weekData[name] = {"score": score, "wins": wins};
     }
     console.log(weekData);
     if (includeWeek) {

@@ -31,23 +31,17 @@ async function showNascarData() {
   
   var tableDataRows = document.getElementsByClassName('Table2__tr Table2__tr--md Table2__odd');
 
-  chrome.storage.sync.get(['scores'], function(scores) {
-      // console.log('Value currently is ' + result.key);
+  chrome.storage.local.get(['scoreData'], function(scoreData) {
+    // console.log('Value currently is ' + result.key);
       
-
+    scoreData = scoreData.scoreData;
+    console.log(scoreData);
     for (var i = 0, l = tableDataRows.length; i < l; i++) {
       var teamName = tableDataRows[i].getElementsByClassName("teamName truncate")[0].getAttribute("title");
-      var score = scores.scores[teamName] || 0;
-      
-      var winColumn = tableDataRows[i].getElementsByClassName("wins__column");
-      var wins;
-      if (winColumn.length === 0) {
-        var recordColumn = tableDataRows[i].children[2]
-        wins = recordColumn.children[0].innerHTML;
-        wins = wins.substr(0, wins.indexOf('-'));
-      } else {
-        wins = winColumn[0].innerHTML;
-      }
+      var score = scoreData.totals[teamName].total_NP;
+      var wins = scoreData.totals[teamName].wins;
+      var wins_multiplier = 7;
+      var adj_score = score + wins*wins_multiplier;
       
       var NPChild = tableDataRows[i].querySelector("#NP"+i.toString())
       if (NPChild) {
@@ -65,7 +59,7 @@ async function showNascarData() {
       } else {
         let child2 = document.createElement('th');
         child2.classList.add("Table2__td");
-        child2.innerHTML = '<div id="ANP'+i.toString()+'" title="Adjusted NASCAR Points" class="jsx-2810852873 table--cell fw-bold">' + (score + wins*7).toString() + '</div>';
+        child2.innerHTML = '<div id="ANP'+i.toString()+'" title="Adjusted NASCAR Points" class="jsx-2810852873 table--cell fw-bold">' + adj_score.toString() + '</div>';
         tableDataRows[i].appendChild(child2);
       }
 
