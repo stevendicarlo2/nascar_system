@@ -73,7 +73,39 @@ async function showNascarData() {
   }
 }
 
-window.onload = showNascarData;
+chrome.runtime.onMessage.addListener(
+  function(request, sender, sendResponse) {
+    console.log("got a message");
+    console.log(request);
+    if (request.action === "refreshScores") {
+      showNascarData();
+    }
+  });
+
+async function onloadFunc() {
+  var selector = document.querySelector("select.dropdown__select");
+  while (!selector) {
+    console.log("no selector yet");
+    await sleep(500);
+    selector = document.querySelector("select.dropdown__select");
+  }
+
+  selector.addEventListener("change", function(e) {
+    console.log("here3");
+    var newYear = e.target.value;
+    chrome.runtime.sendMessage({
+      action: "openPage",
+      year: newYear
+    });
+  });
+  document.getElementsByClassName("standings NavSecondary__Item")[0].addEventListener("click", function() {
+    chrome.runtime.sendMessage({
+      action: "openPage"
+    });
+  });
+}
+
+window.onload = onloadFunc;
 
 
 // <td class="Table2__td"><div title="Games Back" class="jsx-2810852873 table--cell fw-bold">--</div></td>
