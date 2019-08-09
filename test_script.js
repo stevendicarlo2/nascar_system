@@ -108,6 +108,12 @@ async function onloadFunc() {
       year: newYear
     });
   });
+  var headers = document.getElementsByClassName("sortable");
+  for (var i = 0; i<headers.length; i++) {
+    headers[i].addEventListener("click", function() {
+      showNascarData();
+    });
+  }
   document.getElementsByClassName("standings NavSecondary__Item")[0].addEventListener("click", function() {
     chrome.runtime.sendMessage({
       action: "openPage"
