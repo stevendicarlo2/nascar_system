@@ -5,6 +5,7 @@ const sleep = (milliseconds) => {
 async function showNascarData() {
 	console.log("here");
   var teamNames = document.getElementsByClassName('teamName');
+  await sleep(10);
   var tableHeaders = document.getElementsByClassName('Table2__header-row Table2__tr Table2__even');
   if (tableHeaders.length === 0) {
     await sleep(500);
@@ -81,6 +82,12 @@ async function showNascarData() {
   if (finalStandingsButton.length !== 0) {
     finalStandingsButton[0].addEventListener("click", showNascarData);
   }
+  var headers = document.getElementsByClassName("sortable");
+  for (var i = 0; i<headers.length; i++) {
+    headers[i].addEventListener("click", function() {
+      showNascarData();
+    });
+  }
 }
 
 chrome.runtime.onMessage.addListener(
@@ -108,12 +115,6 @@ async function onloadFunc() {
       year: newYear
     });
   });
-  var headers = document.getElementsByClassName("sortable");
-  for (var i = 0; i<headers.length; i++) {
-    headers[i].addEventListener("click", function() {
-      showNascarData();
-    });
-  }
   document.getElementsByClassName("standings NavSecondary__Item")[0].addEventListener("click", function() {
     chrome.runtime.sendMessage({
       action: "openPage"
