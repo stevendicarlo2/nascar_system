@@ -58,7 +58,8 @@ async function getData() {
   console.log("sending message");
   chrome.runtime.sendMessage({
     scores: scoreData,
-    action: "getScores"
+    action: "processScores",
+    year: seasonId
   });
 };
 

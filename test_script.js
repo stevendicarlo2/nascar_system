@@ -2,27 +2,36 @@ const sleep = (milliseconds) => {
   return new Promise(resolve => setTimeout(resolve, milliseconds))
 }
 
-async function showNascarData() {
-  var teamNames = document.getElementsByClassName('teamName');
-  await sleep(10);
-  var tableHeaders = document.getElementsByClassName('Table2__header-row Table2__tr Table2__even');
-  if (tableHeaders.length === 0) {
+
+var tableContents = "";
+
+async function showNascarDataWhenReady() {
+  await waitUntilHeaders();
+  var newContents = document.querySelector(".Table2__tbody").innerHTML;
+  while (tableContents == newContents) {
+    console.log("table contents is still " + newContents + ", couldn't show new data");
+    newContents = document.querySelector(".Table2__tbody").innerHTML;
     await sleep(500);
-    tableHeaders = document.getElementsByClassName('Table2__header-row Table2__tr Table2__even');
   }
+  showNascarData();
+}
+
+function showNascarData() {
+  console.log("starting showNascarData");
+  var tableHeaders = document.getElementsByClassName('Table2__header-row Table2__tr Table2__even');
   for (var i = 0, l = tableHeaders.length; i < l; i++) {
     // console.log(tableHeaders[i]);
     // console.log(tableHeaders[i].innerHTML);
-    if (tableHeaders[i].innerHTML.includes("NASCAR")) {
+    if (tableHeaders[i].innerHTML.includes("nascar-pts-ext")) {
       continue;
     }
     var child = document.createElement('th');
-    child.classList.add("Table2__th");
+    child.classList.add("Table2__th", "nascar-pts-ext");
     child.innerHTML = '<div title="NASCAR Points" class="jsx-2810852873 table--cell header"><span>NP</span></div>';
     tableHeaders[i].appendChild(child);
     
     var child2 = document.createElement('th');
-    child2.classList.add("Table2__th");
+    child2.classList.add("Table2__th", "nascar-pts-ext");
     child2.innerHTML = '<div title="Adjusted NASCAR Points" class="jsx-2810852873 table--cell header"><span>ANP</span></div>';
     tableHeaders[i].appendChild(child2);
   }
@@ -38,8 +47,8 @@ async function showNascarData() {
     console.log(scoreData);
     for (var i = 0, l = tableDataRows.length; i < l; i++) {
       var teamName = tableDataRows[i].getElementsByClassName("teamName truncate")[0].getAttribute("title");
-      var score = scoreData.totals[teamName].total_NP;
-      var wins = scoreData.totals[teamName].wins;
+      var score = (scoreData.totals[teamName])? scoreData.totals[teamName].total_NP : 0;
+      var wins = (scoreData.totals[teamName])? scoreData.totals[teamName].wins : 0;
       var wins_multiplier = 7;
       var adj_score = score + wins*wins_multiplier;
       
@@ -48,7 +57,7 @@ async function showNascarData() {
         NPChild.innerHTML = score.toString();
       } else {
         let child = document.createElement('th');
-        child.classList.add("Table2__td");
+        child.classList.add("Table2__td", "nascar-pts-ext");
         child.innerHTML = '<div id="NP'+i.toString()+'" title="NASCAR Points" class="jsx-2810852873 table--cell fw-bold">' + score.toString() + '</div>';
         tableDataRows[i].appendChild(child);
       }
@@ -58,7 +67,7 @@ async function showNascarData() {
         ANPChild.innerHTML = (score + wins*7).toString();
       } else {
         let child2 = document.createElement('th');
-        child2.classList.add("Table2__td");
+        child2.classList.add("Table2__td", "nascar-pts-ext");
         child2.innerHTML = '<div id="ANP'+i.toString()+'" title="Adjusted NASCAR Points" class="jsx-2810852873 table--cell fw-bold">' + adj_score.toString() + '</div>';
         tableDataRows[i].appendChild(child2);
       }
@@ -86,10 +95,30 @@ chrome.runtime.onMessage.addListener(
   function(request, sender, sendResponse) {
     console.log("got a message");
     console.log(request);
-    if (request.action === "refreshScores") {
-      showNascarData();
+    if (request.action === "refreshDisplay") {
+      showNascarDataWhenReady();
     }
   });
+
+async function waitUntilHeaders() {
+  var headers = document.getElementsByClassName('Table2__tr Table2__tr--md Table2__odd');
+  while (headers.length === 0) {
+    await sleep(500);
+    console.log("headers don't exist yet");
+    headers = document.getElementsByClassName('Table2__tr Table2__tr--md Table2__odd');
+  }
+  return;
+}
+
+function removeNascarData() {
+  var nascarData = document.getElementsByClassName('nascar-pts-ext');
+  while (nascarData.length > 0) {
+    var element = nascarData[nascarData.length - 1];
+    // console.log(element);
+    element.parentNode.removeChild(element);
+  }
+  // console.log("nascar data removed");
+}
 
 async function onloadFunc() {
   var selector = document.querySelector("select.dropdown__select");
@@ -98,17 +127,21 @@ async function onloadFunc() {
     await sleep(500);
     selector = document.querySelector("select.dropdown__select");
   }
+  await showNascarDataWhenReady();
 
   selector.addEventListener("change", function(e) {
     var newYear = e.target.value;
+    removeNascarData();
+    tableContents = document.querySelector(".Table2__tbody").innerHTML;
     chrome.runtime.sendMessage({
-      action: "openPage",
+      action: "loadScores",
       year: newYear
     });
   });
   document.getElementsByClassName("standings NavSecondary__Item")[0].addEventListener("click", function() {
+    tableContents = document.querySelector(".Table2__tbody").innerHTML;
     chrome.runtime.sendMessage({
-      action: "openPage"
+      action: "loadScores"
     });
   });
 }
