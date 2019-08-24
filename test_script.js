@@ -1,17 +1,21 @@
-const sleep = (milliseconds) => {
-  return new Promise(resolve => setTimeout(resolve, milliseconds))
+if (!window.sleep) {
+  window.sleep = (milliseconds) => {
+    return new Promise(resolve => setTimeout(resolve, milliseconds))
+  }
 }
 
+if (!window.tableContents) {
+  window.tableContents = "";
+}
 
-var tableContents = "";
 
 async function showNascarDataWhenReady() {
   await waitUntilHeaders();
   var newContents = document.querySelector(".Table2__tbody").innerHTML;
-  while (tableContents == newContents) {
+  while (window.tableContents == newContents) {
     console.log("table contents is still " + newContents + ", couldn't show new data");
     newContents = document.querySelector(".Table2__tbody").innerHTML;
-    await sleep(500);
+    await window.sleep(500);
   }
   showNascarData();
 }
@@ -98,13 +102,13 @@ chrome.runtime.onMessage.addListener(
     if (request.action === "refreshDisplay") {
       showNascarDataWhenReady();
     }
-  });
+  }
+);
 
 async function waitUntilHeaders() {
   var headers = document.getElementsByClassName('Table2__tr Table2__tr--md Table2__odd');
   while (headers.length === 0) {
-    await sleep(500);
-    console.log("headers don't exist yet");
+    await window.sleep(500);
     headers = document.getElementsByClassName('Table2__tr Table2__tr--md Table2__odd');
   }
   return;
@@ -123,8 +127,7 @@ function removeNascarData() {
 async function onloadFunc() {
   var selector = document.querySelector("select.dropdown__select");
   while (!selector) {
-    // console.log("no selector yet");
-    await sleep(500);
+    await window.sleep(500);
     selector = document.querySelector("select.dropdown__select");
   }
   await showNascarDataWhenReady();
@@ -146,6 +149,5 @@ async function onloadFunc() {
   });
 }
 
-window.onload = onloadFunc;
-
+onloadFunc();
 

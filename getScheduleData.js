@@ -1,5 +1,7 @@
-const sleep = (milliseconds) => {
-  return new Promise(resolve => setTimeout(resolve, milliseconds))
+if (!window.sleep) {
+  window.sleep = (milliseconds) => {
+    return new Promise(resolve => setTimeout(resolve, milliseconds))
+  }
 }
 
 async function getData() {
@@ -7,7 +9,7 @@ async function getData() {
   var weeks = document.getElementsByClassName("matchup--table");
   if (weeks.length === 0) {
     console.log("weeks was empty");
-    await sleep(500);
+    await window.sleep(500);
     weeks = document.getElementsByClassName("matchup--table");
   }
   var scoreData = {}
