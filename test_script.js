@@ -137,6 +137,7 @@ function removeNascarData() {
 }
 
 async function onloadFunc() {
+  console.log("in test script onloadFunc");
   var selector = document.querySelector("select.dropdown__select");
   while (!selector) {
     await window.sleep(500);
@@ -144,21 +145,18 @@ async function onloadFunc() {
   }
   await showNascarDataWhenReady();
 
-  selector.addEventListener("change", function(e) {
-    var newYear = e.target.value;
-    removeNascarData();
-    window.tableContentsHash = document.querySelector(".Table2__tbody").innerHTML.hashCode();
-    chrome.runtime.sendMessage({
-      action: "loadScores",
-      year: newYear
+  if (selector.getAttribute("year-selector-change-listener") !== 'true') {
+    selector.setAttribute("year-selector-change-listener", 'true');
+    selector.addEventListener("change", function(e) {
+      var newYear = e.target.value;
+      removeNascarData();
+      window.tableContentsHash = document.querySelector(".Table2__tbody").innerHTML.hashCode();
+      chrome.runtime.sendMessage({
+        action: "loadScores",
+        year: newYear
+      });
     });
-  });
-  document.getElementsByClassName("standings NavSecondary__Item")[0].addEventListener("click", function() {
-    window.tableContentsHash = document.querySelector(".Table2__tbody").innerHTML.hashCode();
-    chrome.runtime.sendMessage({
-      action: "loadScores"
-    });
-  });
+  }
 }
 
 onloadFunc();

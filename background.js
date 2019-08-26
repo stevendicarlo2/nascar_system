@@ -81,9 +81,7 @@ chrome.runtime.onMessage.addListener(
 chrome.webNavigation.onHistoryStateUpdated.addListener(function(details) {
   if (details.url.includes("https://fantasy.espn.com/football/league/standings")) {
     console.log("navigated to standings");
-    chrome.tabs.executeScript(null, { code: "var manualReload = true;" }, function() {
-      chrome.tabs.executeScript(null,{file:"test_script.js"});
-    });
+    chrome.tabs.executeScript(null,{file:"test_script.js"});
   }
 });
 
