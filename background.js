@@ -9,7 +9,12 @@ function loadScores(year) {
     
     console.log("in loadScores");
     chrome.storage.local.get("scoreData"+seasonId.toString(), function(result) {
-      if (Object.entries(result).length === 0) {
+      let shouldReloadData = Object.entries(result).length === 0;
+      let currTime = new Date().getTime();
+      let daysBetweenRefresh = 1;
+      shouldReloadData = shouldReloadData || (currTime - result["scoreData"+seasonId.toString()].storedTime > daysBetweenRefresh*24*60*60*1000);
+      // shouldReloadData = shouldReloadData || (currTime - result["scoreData"+seasonId.toString()].storedTime > 15*1000);
+      if (shouldReloadData) {
         let scheduleURL = "https://fantasy.espn.com/football/league/schedule?leagueId=" + leagueId.toString() + "&seasonId=" + seasonId.toString();
         chrome.tabs.create({ url: scheduleURL, active: false }, function (tab) {
           tabID = tab.id;
@@ -63,6 +68,7 @@ chrome.runtime.onMessage.addListener(
         }
         // console.log(JSON.stringify(scores));
       }
+      scoreData["storedTime"] = new Date().getTime();
       var info = {};
       info["scoreData" + request.year.toString()] = scoreData;
       chrome.storage.local.set(info, function() {
