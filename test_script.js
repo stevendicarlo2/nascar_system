@@ -4,17 +4,29 @@ if (!window.sleep) {
   }
 }
 
-if (!window.tableContents) {
-  window.tableContents = "";
+String.prototype.hashCode = function() {
+  var hash = 0, i, chr;
+  if (this.length === 0) return hash;
+  for (i = 0; i < this.length; i++) {
+    chr   = this.charCodeAt(i);
+    hash  = ((hash << 5) - hash) + chr;
+    hash |= 0; // Convert to 32bit integer
+  }
+  return hash;
+};
+
+if (!window.tableContentsHash) {
+  window.tableContentsHash = 0;
 }
 
 
 async function showNascarDataWhenReady() {
   await waitUntilHeaders();
   var newContents = document.querySelector(".Table2__tbody").innerHTML;
-  while (window.tableContents == newContents) {
-    console.log("table contents is still " + newContents + ", couldn't show new data");
+  var newContentsHash = newContents.hashCode();
+  while (window.tableContentsHash == newContentsHash) {
     newContents = document.querySelector(".Table2__tbody").innerHTML;
+    newContentsHash = newContents.hashCode();
     await window.sleep(500);
   }
   showNascarData();
@@ -135,14 +147,14 @@ async function onloadFunc() {
   selector.addEventListener("change", function(e) {
     var newYear = e.target.value;
     removeNascarData();
-    tableContents = document.querySelector(".Table2__tbody").innerHTML;
+    window.tableContentsHash = document.querySelector(".Table2__tbody").innerHTML.hashCode();
     chrome.runtime.sendMessage({
       action: "loadScores",
       year: newYear
     });
   });
   document.getElementsByClassName("standings NavSecondary__Item")[0].addEventListener("click", function() {
-    tableContents = document.querySelector(".Table2__tbody").innerHTML;
+    window.tableContentsHash = document.querySelector(".Table2__tbody").innerHTML.hashCode();
     chrome.runtime.sendMessage({
       action: "loadScores"
     });
