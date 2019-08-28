@@ -13,7 +13,7 @@ function loadScores(year) {
       let currTime = new Date().getTime();
       let daysBetweenRefresh = 1;
       shouldReloadData = shouldReloadData || (currTime - result["scoreData"+seasonId.toString()].storedTime > daysBetweenRefresh*24*60*60*1000);
-      // shouldReloadData = shouldReloadData || (currTime - result["scoreData"+seasonId.toString()].storedTime > 15*1000);
+      // shouldReloadData = shouldReloadData || (currTime - result["scoreData"+seasonId.toString()].storedTime > 1*1000);
       if (shouldReloadData) {
         let scheduleURL = "https://fantasy.espn.com/football/league/schedule?leagueId=" + leagueId.toString() + "&seasonId=" + seasonId.toString();
         chrome.tabs.create({ url: scheduleURL, active: false }, function (tab) {

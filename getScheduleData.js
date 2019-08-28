@@ -30,22 +30,23 @@ async function getData() {
     var includeWeek = false;
     for (var j=0; j<teamNames.length; j++) {
       var name = teamNames[j].getAttribute("title");
-      var score = weekScores[j].getElementsByClassName("link");
-      if (score.length === 0) {
+      var scoreEntry = weekScores[j].querySelector(".link");
+
+      if (!scoreEntry) {
         continue;
-      } else {
-        score = parseFloat(score[0].innerHTML);
-        if (score !== 0) {
-          includeWeek = true;
-        }
-        var oppIndex = (j%2 === 0) ? j+1 : j-1;
-        var oppScore = parseFloat(weekScores[oppIndex].getElementsByClassName("link")[0].innerHTML);
-        var wins;
-        if (score > oppScore) { wins = 1; }
-        else if (score < oppScore) { wins = 0; }
-        else { wins = .5; }
-        
       }
+      var score = parseFloat(scoreEntry.innerHTML);
+      if (score !== 0) {
+        includeWeek = true;
+      }
+
+      var wins;
+      var oppIndex = (j%2 === 0) ? j+1 : j-1;
+
+      if (weekScores[j].classList.contains("winnerTeam")) { wins = 1; }
+      else if (weekScores[oppIndex].classList.contains("winnerTeam")) { wins = 0; }
+      else { wins = .5; }        
+      
       // console.log(name);
       // console.log(score);
       weekData[name] = {"score": score, "wins": wins};
