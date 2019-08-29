@@ -91,19 +91,32 @@ function showNascarData() {
     }
 
   });
-  var regularSeasonButton = document.getElementsByClassName("btn standings_page_regular_season");
-  if (regularSeasonButton.length !== 0) {
-    regularSeasonButton[0].addEventListener("click", showNascarData);
+  var regularSeasonButton = document.querySelector(".btn.standings_page_regular_season");
+  if (regularSeasonButton.getAttribute("regular-season-button-listener") !== 'true') {
+    regularSeasonButton.setAttribute("regular-season-button-listener", 'true');
+    regularSeasonButton.addEventListener("click", function() {
+      removeNascarData();
+      window.tableContentsHash = document.querySelector(".Table2__tbody").innerHTML.hashCode();
+      showNascarDataWhenReady();
+    });
   }
-  var finalStandingsButton = document.getElementsByClassName("btn standings_page_final_standings");
-  if (finalStandingsButton.length !== 0) {
-    finalStandingsButton[0].addEventListener("click", showNascarData);
+  var finalStandingsButton = document.querySelector(".btn.standings_page_final_standings");
+  if (finalStandingsButton.getAttribute("final-standings-button-listener") !== 'true') {
+    finalStandingsButton.setAttribute("final-standings-button-listener", 'true');
+    finalStandingsButton.addEventListener("click", function() {
+      removeNascarData();
+      window.tableContentsHash = document.querySelector(".Table2__tbody").innerHTML.hashCode();
+      showNascarDataWhenReady();
+    });
   }
   var headers = document.getElementsByClassName("sortable");
   for (var i = 0; i<headers.length; i++) {
-    headers[i].addEventListener("click", function() {
-      showNascarData();
-    });
+    if (headers[i].getAttribute("re-sort-listener") !== 'true') {
+      headers[i].setAttribute("re-sort-listener", 'true');
+      headers[i].addEventListener("click", function() {
+        showNascarData();
+      });
+    }
   }
 }
 
