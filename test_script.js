@@ -56,17 +56,17 @@ function showNascarData() {
   
   var tableDataRows = document.getElementsByClassName('Table2__tr Table2__tr--md Table2__odd');
 
-  chrome.storage.local.get(['scoreData'], function(scoreData) {
+  chrome.storage.local.get(['scoreData', 'pointsPerWin'], function(storedData) {
     // console.log('Value currently is ' + result.key);
       
-    scoreData = scoreData.scoreData;
+    scoreData = storedData.scoreData;
     console.log(scoreData);
+    var pointsPerWin = storedData.pointsPerWin;
     for (var i = 0, l = tableDataRows.length; i < l; i++) {
       var teamName = tableDataRows[i].getElementsByClassName("teamName truncate")[0].getAttribute("title");
       var score = (scoreData.totals[teamName])? scoreData.totals[teamName].total_NP : 0;
       var wins = (scoreData.totals[teamName])? scoreData.totals[teamName].wins : 0;
-      var wins_multiplier = 7;
-      var adj_score = score + wins*wins_multiplier;
+      var adj_score = score + wins*pointsPerWin;
       
       var NPChild = tableDataRows[i].querySelector("#NP"+i.toString())
       if (NPChild) {
@@ -80,7 +80,7 @@ function showNascarData() {
       
       var ANPChild = tableDataRows[i].querySelector("#ANP"+i.toString())
       if (ANPChild) {
-        ANPChild.innerHTML = (score + wins*7).toString();
+        ANPChild.innerHTML = adj_score.toString();
       } else {
         let child2 = document.createElement('th');
         child2.classList.add("Table2__td", "nascar-pts-ext");
