@@ -1,11 +1,12 @@
 <!DOCTYPE html>
 <html>
   <head>
+    <script src="popup.js"></script>
   </head>
   <body>
-    <p>Number of points for a win:</p>
-    <input id="winValue" type="number" min="0"></input>
-    <button id="submit" type="submit">Save</button>
-    <script src="popup.js"></script>
+    <form id="winValueForm">
+      Number of points for a win: <input id="winValue" type="number" min="0"/>
+      <input id="submit" type="submit"/>
+    </form>
   </body>
 </html>

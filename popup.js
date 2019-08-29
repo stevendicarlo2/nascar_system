@@ -1,4 +1,12 @@
-document.getElementById('submit').addEventListener("click", function() {
+document.addEventListener('DOMContentLoaded', function(){
+ 
+chrome.storage.local.get(['pointsPerWin'], function(pointsPerWin) {
+  var defaultPoints = (pointsPerWin.pointsPerWin !== undefined) ? pointsPerWin.pointsPerWin : 14;
+  document.getElementById("winValue").value = defaultPoints;
+});
+
+document.getElementById("winValueForm").addEventListener("submit", function(e) {
+  e.preventDefault();
   let points = document.getElementById("winValue").value;
   let pointsNum = parseInt(points);
   chrome.storage.local.set({"pointsPerWin": pointsNum}, function() {
@@ -6,4 +14,5 @@ document.getElementById('submit').addEventListener("click", function() {
       chrome.tabs.sendMessage(tabs[0].id,{ action: "refreshDisplay" });
     });
   });
+});
 });

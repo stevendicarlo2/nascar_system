@@ -60,8 +60,8 @@ function showNascarData() {
     // console.log('Value currently is ' + result.key);
       
     scoreData = storedData.scoreData;
-    console.log(scoreData);
-    var pointsPerWin = storedData.pointsPerWin;
+    console.log(storedData);
+    var pointsPerWin = (storedData.pointsPerWin !== undefined) ? storedData.pointsPerWin : 14;
     for (var i = 0, l = tableDataRows.length; i < l; i++) {
       var teamName = tableDataRows[i].getElementsByClassName("teamName truncate")[0].getAttribute("title");
       var score = (scoreData.totals[teamName])? scoreData.totals[teamName].total_NP : 0;
