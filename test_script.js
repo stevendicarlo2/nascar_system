@@ -91,6 +91,22 @@ function showNascarData() {
     }
 
   });
+  
+  let table = document.querySelector(".Table2__tbody");
+  if (!table.parentNode.parentNode.querySelector(".refreshScoresButton")) {
+    let refreshButton = document.createElement('button');
+    refreshButton.setAttribute("type", "button");
+    refreshButton.classList.add("refreshScoresButton");
+    refreshButton.innerHTML = "Refresh Score Data";
+    refreshButton.addEventListener("click", function() {
+      chrome.runtime.sendMessage({
+        action: "loadScores",
+        override: "true"
+      });
+    });
+    table.parentNode.parentNode.appendChild(refreshButton);
+  }
+  
   var regularSeasonButton = document.querySelector(".btn.standings_page_regular_season");
   if (regularSeasonButton.getAttribute("regular-season-button-listener") !== 'true') {
     regularSeasonButton.setAttribute("regular-season-button-listener", 'true');

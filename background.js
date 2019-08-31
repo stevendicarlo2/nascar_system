@@ -1,7 +1,7 @@
 
 var tabID;
 
-function loadScores(year) {
+function loadScores(year, override) {
   chrome.cookies.get({"url": "https://fantasy.espn.com", "name": "kona_v3_environment_season_ffl"}, function(cookie) {
     let cookieInfo = JSON.parse(cookie.value);
     let seasonId = (year) ? year : (cookieInfo["seasonId"] || 2019);
@@ -14,6 +14,7 @@ function loadScores(year) {
       let daysBetweenRefresh = 1;
       shouldReloadData = shouldReloadData || (currTime - result["scoreData"+seasonId.toString()].storedTime > daysBetweenRefresh*24*60*60*1000);
       // shouldReloadData = shouldReloadData || (currTime - result["scoreData"+seasonId.toString()].storedTime > 1*1000);
+      shouldReloadData = shouldReloadData || override;
       if (shouldReloadData) {
         let scheduleURL = "https://fantasy.espn.com/football/league/schedule?leagueId=" + leagueId.toString() + "&seasonId=" + seasonId.toString();
         chrome.tabs.create({ url: scheduleURL, active: false }, function (tab) {
@@ -44,7 +45,8 @@ chrome.runtime.onMessage.addListener(
     console.log("got a message");
     console.log(request);
     if (request.action === "loadScores") {
-      loadScores(request.year);
+      let override = request.override === "true";
+      loadScores(request.year, override);
     }
     if (request.action === "processScores") {
       let scoreData = {"weekly_breakdown": request.scores, "totals": {}};
