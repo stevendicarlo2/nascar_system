@@ -6,7 +6,22 @@
   <body>
     <form id="winValueForm">
       Number of points for a win: <input id="winValue" type="number" min="0"/>
-      <input id="submit" type="submit"/>
+      <input id="winValueSubmit" type="submit"/>
     </form>
+    <br/><br/>
+    <form id="adjustmentForm">
+      Enter any adjustments to weekly scores:<br/>
+      <p id="adjustmentFormError" style="color:red;display:none;">Make sure to fill out all fields</p><br/>
+      <label for="yearSelector">Season:</label>
+      <select id="yearSelector"><option selected disabled></option></select><br/>
+      <label for="weekSelector">Week:</label>
+      <select id="weekSelector"></select><br/>
+      <label for="teamSelector">Team:</label>
+      <select id="teamSelector"></select><br/>
+      <label for="adjustmentValue">Adjustment:</label>
+      <input id="adjustmentValue" type="number" step="any"/>
+      <input id="adjustmentSubmit" type="submit"/>
+    </form>
+    <div id="existingAdjustments"></div>
   </body>
 </html>

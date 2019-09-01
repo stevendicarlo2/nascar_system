@@ -1,6 +1,46 @@
 
 var tabID;
 
+function getAdjustedScores(adjustments, scoreData) {
+  for (let week in adjustments) {
+    for (let team in adjustments[week]) {
+      let value = parseFloat(adjustments[week][team]);
+      if (week in scoreData) {
+        if (team in scoreData[week]) {
+          scoreData[week][team].score += value;
+        }
+      }
+    }
+  }
+  scoreData["storedTime"] = new Date().getTime();
+  return scoreData;
+}
+
+function processScores(rawData) {
+  let scoreData = {"weekly_breakdown": rawData, "totals": {}};
+  for (let weekNum in rawData) {
+    let week = rawData[weekNum];
+    let weekRank = [];
+    for (let owner in week) {
+      if (!(owner in scoreData.totals)) {
+        scoreData.totals[owner] = {"total_NP": 0, "wins": 0};
+      }
+      weekRank.push({"name": owner, "score": week[owner].score, "wins": week[owner].wins})
+    }
+    weekRank.sort(function(a, b) { return b.score-a.score });
+    // console.log(weekRank);
+    for (let i = 0; i < weekRank.length; i++) {
+      // console.log(scores[weekRank[i].name]);
+      let nascar_points = weekRank.length - i;
+      scoreData.weekly_breakdown[weekNum][weekRank[i].name].nascar_points = nascar_points;
+      scoreData.totals[weekRank[i].name].total_NP += nascar_points;
+      scoreData.totals[weekRank[i].name].wins += weekRank[i].wins;
+    }
+    // console.log(JSON.stringify(scores));
+  }
+  return scoreData;
+}
+
 function loadScores(year, override) {
   chrome.cookies.get({"url": "https://fantasy.espn.com", "name": "kona_v3_environment_season_ffl"}, function(cookie) {
     let cookieInfo = JSON.parse(cookie.value);
@@ -8,12 +48,16 @@ function loadScores(year, override) {
     let leagueId = cookieInfo["leagueId"];
     
     console.log("in loadScores");
-    chrome.storage.local.get("scoreData"+seasonId.toString(), function(result) {
-      let shouldReloadData = Object.entries(result).length === 0;
+    chrome.storage.local.get(["scoreData"+seasonId.toString(), "adjustments"], function(result) {
+      let adjustments = result.adjustments || {};
+      adjustments = adjustments[seasonId.toString()] || {};
+      let scoreData = result["scoreData"+seasonId.toString()];
+
+      let shouldReloadData = !scoreData;
       let currTime = new Date().getTime();
       let daysBetweenRefresh = 1;
-      shouldReloadData = shouldReloadData || (currTime - result["scoreData"+seasonId.toString()].storedTime > daysBetweenRefresh*24*60*60*1000);
-      // shouldReloadData = shouldReloadData || (currTime - result["scoreData"+seasonId.toString()].storedTime > 1*1000);
+      shouldReloadData = shouldReloadData || (currTime - scoreData.storedTime > daysBetweenRefresh*24*60*60*1000);
+      // shouldReloadData = shouldReloadData || (currTime - scoreData.storedTime > 1*1000);
       shouldReloadData = shouldReloadData || override;
       if (shouldReloadData) {
         let scheduleURL = "https://fantasy.espn.com/football/league/schedule?leagueId=" + leagueId.toString() + "&seasonId=" + seasonId.toString();
@@ -24,9 +68,11 @@ function loadScores(year, override) {
           });
         });
       } else {
-        chrome.storage.local.set({"scoreData": result["scoreData"+seasonId.toString()]}, function() {
+        let adjustedScores = getAdjustedScores(adjustments, scoreData);
+        let processedData = processScores(adjustedScores);
+        chrome.storage.local.set({"scoreData": processedData}, function() {
           console.log('scoreData has been set from stored data:');
-          console.log(result);
+          console.log(processedData);
           chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
             chrome.tabs.sendMessage(tabs[0].id,{ action: "refreshDisplay" });
           });
@@ -49,40 +95,24 @@ chrome.runtime.onMessage.addListener(
       loadScores(request.year, override);
     }
     if (request.action === "processScores") {
-      let scoreData = {"weekly_breakdown": request.scores, "totals": {}};
-      for (let weekNum in request.scores) {
-        let week = request.scores[weekNum];
-        let weekRank = [];
-        for (let owner in week) {
-          if (!(owner in scoreData.totals)) {
-            scoreData.totals[owner] = {"total_NP": 0, "wins": 0};
-          }
-          weekRank.push({"name": owner, "score": week[owner].score, "wins": week[owner].wins})
-        }
-        weekRank.sort(function(a, b) { return b.score-a.score });
-        // console.log(weekRank);
-        for (let i = 0; i < weekRank.length; i++) {
-          // console.log(scores[weekRank[i].name]);
-          let nascar_points = weekRank.length - i;
-          scoreData.weekly_breakdown[weekNum][weekRank[i].name].nascar_points = nascar_points;
-          scoreData.totals[weekRank[i].name].total_NP += nascar_points;
-          scoreData.totals[weekRank[i].name].wins += weekRank[i].wins;
-        }
-        // console.log(JSON.stringify(scores));
-      }
-      scoreData["storedTime"] = new Date().getTime();
-      var info = {};
-      info["scoreData" + request.year.toString()] = scoreData;
-      chrome.storage.local.set(info, function() {
-        chrome.storage.local.set({"scoreData": scoreData}, function() {
-          console.log('scoreData has been set from scraping page:');
-          console.log(scoreData);
-          chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-            chrome.tabs.sendMessage(tabs[0].id,{ action: "refreshDisplay" });
+      chrome.storage.local.get(["adjustments"], function(result) {
+        let adjustments = result.adjustments || {};
+        adjustments = adjustments[request.year] || {};
+        let adjustedScores = getAdjustedScores(adjustments, request.scores);
+        let scoreData = processScores(adjustedScores);
+        var info = {};
+        info["scoreData" + request.year.toString()] = adjustedScores;
+        chrome.storage.local.set(info, function() {
+          chrome.storage.local.set({"scoreData": scoreData}, function() {
+            console.log('scoreData has been set from scraping page:');
+            console.log(scoreData);
+            chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+              chrome.tabs.sendMessage(tabs[0].id,{ action: "refreshDisplay" });
+            });
           });
         });
+        chrome.tabs.remove(tabID);
       });
-      chrome.tabs.remove(tabID);
     }
   });
 
