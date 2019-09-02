@@ -13,8 +13,8 @@
     "content_scripts": [
       {
         "matches": ["https://fantasy.espn.com/football/league*"],
-        "css": ["style.css"],
-        "js": ["inject_link.js"]
+        "css": ["style.css", "datatables/myBootstrap.css", "datatables/myDatatables.css"],
+        "js": ["inject_link.js",  "jquery-3.4.1.min.js", "datatables/mdb.min.js", "datatables/datatables.min.js"]
       }
     ],
     "manifest_version": 2

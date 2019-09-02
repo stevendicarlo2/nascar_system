@@ -19,6 +19,97 @@ if (!window.tableContentsHash) {
   window.tableContentsHash = 0;
 }
 
+function createWeeklyBreakdownTable(scoreData, pointsPerWin) {
+  let defaultTable = document.querySelector(".Table2__tbody");
+  let base = defaultTable.parentNode.parentNode;
+  // let shadowHost = document.createElement("div");
+  // shadowHost.id = "shadowHost";
+  // base.appendChild(shadowHost);
+  // let shadowRoot = shadowHost.attachShadow({ mode: "open"});
+  let shadowRoot = document.createElement("div");
+  base.appendChild(shadowRoot);
+  shadowRoot.innerHTML = '<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.2/css/all.css">';
+  // shadowRoot.innerHTML += '<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">';
+  // shadowRoot.innerHTML += '<link href="datatables/mdb.min.css" rel="stylesheet">';
+  // shadowRoot.innerHTML += '<link href="datatables/datatables.min.css" rel="stylesheet">';
+  
+  shadowRoot.innerHTML += '<script type="text/javascript" src="datatables/jquery-3.4.1.min.js"></script>';
+  shadowRoot.innerHTML += '<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>';
+  shadowRoot.innerHTML += '<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>';
+  shadowRoot.innerHTML += '<script type="text/javascript" src="datatables/mdb.min.js"></script>';
+  shadowRoot.innerHTML += '<script type="text/javascript" src="datatables/datatables.min.js"></script>';
+  
+  let container = document.createElement("div");
+  container.classList.add("myDataTable");
+  shadowRoot.appendChild(container);
+  let table = document.createElement("table");
+  table.classList.add("table", "table-bordered", "table-sm");
+  table.id = "weekly_breakdown_table";
+  container.appendChild(table);
+  let thead = document.createElement("thead");
+  table.appendChild(thead);
+  let headRow = document.createElement("tr");
+  thead.appendChild(headRow);
+  let ownerCol = document.createElement("th");
+  ownerCol.classList.add("th-sm");
+  ownerCol.innerHTML = "Team";
+  headRow.appendChild(ownerCol);
+  for (let week in scoreData.weekly_breakdown) {
+    if (week === "storedTime") {
+      continue;
+    }
+    let weekCol = document.createElement("th");
+    weekCol.classList.add("th-sm");
+    weekCol.innerHTML = "Week " + (parseInt(week) + 1).toString();
+    headRow.appendChild(weekCol);
+  }
+  let totalCol = document.createElement("th");
+  totalCol.classList.add("th-sm");
+  totalCol.innerHTML = "Total NP";
+  headRow.appendChild(totalCol);
+  let adjCol = document.createElement("th");
+  adjCol.classList.add("th-sm");
+  adjCol.innerHTML = "Total ANP";
+  headRow.appendChild(adjCol);
+
+
+  // Filling with data
+  let tbody = document.createElement("tbody");
+  table.appendChild(tbody);
+  for (let team in scoreData.totals) {
+    let row = document.createElement("tr");
+    let nameEntry = document.createElement("td");
+    nameEntry.innerHTML = team;
+    row.appendChild(nameEntry);
+    for (let week in scoreData.weekly_breakdown) {
+      if (week === "storedTime") {
+        continue;
+      }
+      let info = scoreData.weekly_breakdown[week][team];
+      let entry = document.createElement("td");
+      entry.innerHTML = info.nascar_points + info.wins*pointsPerWin;
+      if (info.wins === 1) {
+        entry.innerHTML = "<u>" + entry.innerHTML + "</u>";
+      }
+      row.appendChild(entry);
+    }
+    let totEntry = document.createElement("td");
+    totEntry.innerHTML = "<b>" + scoreData.totals[team].total_NP + "</b>";
+    row.appendChild(totEntry);
+    let adjEntry = document.createElement("td");
+    adjEntry.innerHTML = "<b>" + (scoreData.totals[team].total_NP + scoreData.totals[team].wins*pointsPerWin) + "</b>";
+    row.appendChild(adjEntry);
+    tbody.appendChild(row);
+  }
+  
+
+
+  $(document).ready(function () {
+    $('#weekly_breakdown_table').DataTable();
+    $('.dataTables_length').addClass('bs-select');
+  });
+
+}
 
 async function showNascarDataWhenReady() {
   await waitUntilHeaders();
@@ -89,6 +180,7 @@ function showNascarData() {
       }
 
     }
+    createWeeklyBreakdownTable(scoreData, pointsPerWin);
 
   });
   
