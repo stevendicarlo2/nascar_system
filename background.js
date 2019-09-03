@@ -31,7 +31,16 @@ function processScores(rawData) {
     // console.log(weekRank);
     for (let i = 0; i < weekRank.length; i++) {
       // console.log(scores[weekRank[i].name]);
-      let nascar_points = weekRank.length - i;
+      let score = weekRank[i].score;
+      let numTeams = 0;
+      let accumPoints = 0.0;
+      for (let j = 0; j < weekRank.length; j++) {
+        if (weekRank[j].score === score) {
+          numTeams += 1;
+          accumPoints += weekRank.length - j;
+        }
+      }
+      let nascar_points = accumPoints / numTeams;
       scoreData.weekly_breakdown[weekNum][weekRank[i].name].nascar_points = nascar_points;
       scoreData.totals[weekRank[i].name].total_NP += nascar_points;
       scoreData.totals[weekRank[i].name].wins += weekRank[i].wins;
