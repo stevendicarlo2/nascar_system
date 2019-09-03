@@ -26,7 +26,17 @@ function removeWeeklyBreakdownTable() {
   }
 }
 
-function createWeeklyBreakdownTable(scoreData, pointsPerWin) {
+function recreateWeeklyBreakdownTable(useNascarPoints = true) {
+  let origTable = document.querySelector("#weekly_breakdown_table");
+  let scoreDataString = origTable.getAttribute("data-scoreData");
+  let pointsPerWinString = origTable.getAttribute("data-pointsPerWin");
+  let scoreData = JSON.parse(scoreDataString);
+  let pointsPerWin = parseInt(pointsPerWinString);
+  removeWeeklyBreakdownTable();
+  createWeeklyBreakdownTable(scoreData, pointsPerWin, useNascarPoints);
+}
+
+function createWeeklyBreakdownTable(scoreData, pointsPerWin, useNascarPoints = true) {
   removeWeeklyBreakdownTable();
   let doubleTableBase = document.querySelector(".h2hTables");
   let base;
@@ -61,6 +71,8 @@ function createWeeklyBreakdownTable(scoreData, pointsPerWin) {
   let table = document.createElement("table");
   table.classList.add("table", "table-bordered", "table-sm");
   table.id = "weekly_breakdown_table";
+  table.setAttribute("data-scoreData", JSON.stringify(scoreData));
+  table.setAttribute("data-pointsPerWin", pointsPerWin);
   container.appendChild(table);
   let thead = document.createElement("thead");
   table.appendChild(thead);
@@ -105,24 +117,32 @@ function createWeeklyBreakdownTable(scoreData, pointsPerWin) {
     adjEntry.classList.add("ANP_data");
     adjEntry.innerHTML = "<b>" + (scoreData.totals[team].total_NP + scoreData.totals[team].wins*pointsPerWin) + "</b>";
     row.appendChild(adjEntry);
-    tbody.appendChild(row);
     for (let week in scoreData.weekly_breakdown) {
       if (week === "storedTime") {
         continue;
       }
       let info = scoreData.weekly_breakdown[week][team];
       let entry = document.createElement("td");
-      entry.setAttribute("nascar-points", info.nascar_points + info.wins*pointsPerWin);
-      entry.setAttribute("raw-points", info.score);
-      entry.setAttribute("wins", info.wins);
+      entry.setAttribute("data-nascar-points", info.nascar_points + info.wins*pointsPerWin);
+      entry.setAttribute("data-raw-points", info.score);
+      entry.setAttribute("data-wins", info.wins);
+      entry.innerHTML = useNascarPoints ? info.nascar_points + info.wins*pointsPerWin : info.score;
+      if (info.wins === 1) {
+        entry.innerHTML = "<u>" + entry.innerHTML + "</u>";
+      }
+      entry.classList.add("weeklyData");
       row.appendChild(entry);
     }
+    tbody.appendChild(row);
   }
-  shadowRoot.innerHTML += '<label id="scoreTypeSwitchLabel" for="scoreTypeSwitch">Nascar Points</label><label class="switch"><input id="scoreTypeSwitch" type="checkbox" checked><span class="slider round"></span></label>';
+  if (useNascarPoints) {
+    shadowRoot.innerHTML += '<label id="scoreTypeSwitchLabel" for="scoreTypeSwitch">Nascar Points</label><label class="switch"><input id="scoreTypeSwitch" type="checkbox" checked><span class="slider round"></span></label>';
+  } else {
+    shadowRoot.innerHTML += '<label id="scoreTypeSwitchLabel" for="scoreTypeSwitch">Weekly Score</label><label class="switch"><input id="scoreTypeSwitch" type="checkbox"><span class="slider round"></span></label>';
+  }
   
 
   $(document).ready(function () {
-    fillTableWithData(true);
     if ($.fn.dataTable.isDataTable('#weekly_breakdown_table')) {
       $('#weekly_breakdown_table').DataTable();
     } else {
@@ -134,41 +154,44 @@ function createWeeklyBreakdownTable(scoreData, pointsPerWin) {
     }
     $('.dataTables_length').addClass('bs-select');
     $('#weekly_breakdown_table').parent().addClass('freezeTable');
-    var freezeTable = new FreezeTable('.freezeTable', {"columnNum": 3, "columnWrapStyles": {'border-right': '3px solid black'}});
-    $('#weekly_breakdown_table th').click(function() {
+    var freezeTable = new FreezeTable('.freezeTable', {
+      "columnNum": 3, 
+      "columnWrapStyles": {'border-right': '3px solid black'}
+    });
+    $('#weekly_breakdown_table_wrapper th').click(function() {
       freezeTable.update();
     });
     $("#scoreTypeSwitch").click(function() {
       $("#scoreTypeSwitchLabel").html(this.checked ? "Nascar Points" : "Weekly Score");
-      fillTableWithData(this.checked);
-      freezeTable.update();
-    });
-  });
-}
-
-function fillTableWithData(useNascarPoints) {
-  $(document).ready(function () {
-    $("#weekly_breakdown_table td").each(function(i) {
-      if (!(this.classList.contains("NP_data") || this.classList.contains("ANP_data") || this.classList.contains("teamName"))) {
-        if (useNascarPoints) {
-          this.innerHTML = this.getAttribute("nascar-points");
-        } else {
-          this.innerHTML = this.getAttribute("raw-points");
-        }
-        if (this.getAttribute("wins") === "1") {
-          this.innerHTML = "<u>" + this.innerHTML + "</u>";
-        }
-      }
+      recreateWeeklyBreakdownTable(this.checked);
     });
     highlightTable();
   });
 }
 
+// function fillTableWithData(useNascarPoints) {
+//   $(document).ready(function () {
+//     $("#weekly_breakdown_table_wrapper td").each(function(i) {
+//       if (!(this.classList.contains("NP_data") || this.classList.contains("ANP_data") || this.classList.contains("teamName"))) {
+//         if (useNascarPoints) {
+//           this.innerHTML = this.getAttribute("data-nascar-points");
+//         } else {
+//           this.innerHTML = this.getAttribute("data-raw-points");
+//         }
+//         if (this.getAttribute("data-wins") === "1") {
+//           this.innerHTML = "<u>" + this.innerHTML + "</u>";
+//         }
+//       }
+//     });
+//     highlightTable();
+//   });
+// }
+
 function highlightTable() {
   let minScore, minNP, minANP, minWeekScore;
   let maxScore=0, maxNP=0, maxANP=0, maxWeekScore=0;
 
-  d3.selectAll("#weekly_breakdown_table td").each(function(d, i) {
+  d3.selectAll("#weekly_breakdown_table_wrapper td").each(function(d, i) {
     if (this.classList.contains("NP_data")) {
       let nascarPoints = parseFloat(this.textContent);
       if (minNP === undefined) {
@@ -186,8 +209,8 @@ function highlightTable() {
       }
       maxANP = (adjNascarPoints > maxANP) ? adjNascarPoints : maxANP;
     } else if (!this.classList.contains("teamName")) {
-      let nascarPoints = parseFloat(this.getAttribute("nascar-points"));
-      let rawPoints = parseFloat(this.getAttribute("raw-points"));
+      let nascarPoints = parseFloat(this.getAttribute("data-nascar-points"));
+      let rawPoints = parseFloat(this.getAttribute("data-raw-points"));
       if (minScore === undefined) {
         minScore = rawPoints;
       } else {
@@ -220,7 +243,7 @@ function highlightTable() {
   .domain([minScore, (minScore+maxScore)/2, maxScore])
   .range([badColor, mediumColor, goodColor]);
 
-  d3.selectAll("#weekly_breakdown_table td").each(function(d, i) {
+  d3.selectAll("#weekly_breakdown_table_wrapper td").each(function(d, i) {
     let value = parseFloat(this.textContent);
     let color;
     if (this.classList.contains("NP_data")) {
@@ -231,7 +254,6 @@ function highlightTable() {
       if ($("#scoreTypeSwitch").is(":checked")) {
         color = colorScale(value);
       } else {
-        console.log(value);
         color = colorScaleRaw(value);
       }
     }
