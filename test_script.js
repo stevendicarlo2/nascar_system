@@ -156,11 +156,55 @@ function createWeeklyBreakdownTable(scoreData, pointsPerWin, useNascarPoints = t
     $('#weekly_breakdown_table').parent().addClass('freezeTable');
     var freezeTable = new FreezeTable('.freezeTable', {
       "columnNum": 3, 
-      "columnWrapStyles": {'border-right': '3px solid black'}
+      "columnWrapStyles": {'border-right': '3px solid black'},
+      "freezeColumnHead": false,
+      "freezeHead": false
     });
-    $('#weekly_breakdown_table_wrapper th').click(function() {
-      freezeTable.update();
+
+    let addHandlerToBreakdownHeader = function(header, isOriginal) {
+      if (header.getAttribute("sort_handler_exists") !== "true") {
+        header.setAttribute("sort_handler_exists", "true");
+        header.addEventListener("click", function() {
+          if (!isOriginal) {
+            let originalHeader = $( "#weekly_breakdown_table th:contains('" + this.textContent + "')" );
+            originalHeader.click();
+          }
+          let oldTableCopy = document.querySelector("#weekly_breakdown_table_wrapper .clone-column-table-wrap table");
+          let oldTableStyle = oldTableCopy.style.cssText;
+          let newTableCopy = document.getElementById("weekly_breakdown_table").cloneNode(true);
+          newTableCopy.removeAttribute("id");
+          newTableCopy.style.cssText = oldTableStyle;
+          newTableCopy.querySelectorAll("th").forEach(function(header) {
+            header.removeAttribute("sort_handler_exists");
+          });
+
+          let tableParent = oldTableCopy.parentNode;
+          tableParent.removeChild(oldTableCopy);
+          tableParent.appendChild(newTableCopy);
+          addHandlersToAllBreakdownHeaders();
+        });
+      }
+    }
+
+    let addHandlersToAllBreakdownHeaders = function() {
+      let copiedHeaders = document.querySelectorAll('#weekly_breakdown_table_wrapper .clone-column-table-wrap th');
+      copiedHeaders.forEach(function(header) {
+        addHandlerToBreakdownHeader(header, false);
+      });
+      let originalHeaders = document.querySelectorAll('#weekly_breakdown_table th');
+      originalHeaders.forEach(function(header) {
+        addHandlerToBreakdownHeader(header, true);
+      });
+    }
+    addHandlersToAllBreakdownHeaders();
+    let targetNode = document.querySelector('#weekly_breakdown_table_wrapper .clone-column-table-wrap');
+    let observer = new MutationObserver(function(){
+        if(targetNode.style.visibility === 'visible') {
+          addHandlersToAllBreakdownHeaders();
+        }
     });
+    observer.observe(targetNode, { attributes: true, childList: true });
+
     $("#scoreTypeSwitch").click(function() {
       $("#scoreTypeSwitchLabel").html(this.checked ? "Nascar Points" : "Weekly Score");
       recreateWeeklyBreakdownTable(this.checked);
