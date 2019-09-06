@@ -1,6 +1,6 @@
 {
     "name": "NASCAR Fantasy football scoring",
-    "version": "1.1",
+    "version": "1.2",
     "description": "A better way to play fantasy",
     "permissions": ["storage", "declarativeContent", "webNavigation", "cookies", "*://fantasy.espn.com/", "*://fantasy.espn.com", "tabs"],
     "background": {
