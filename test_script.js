@@ -319,63 +319,96 @@ async function showNascarDataWhenReady() {
 
 function showNascarData() {
   console.log("starting showNascarData");
-  var tableHeaders = document.getElementsByClassName('Table2__header-row Table2__tr Table2__even');
-  for (var i = 0, l = tableHeaders.length; i < l; i++) {
-    // console.log(tableHeaders[i]);
-    // console.log(tableHeaders[i].innerHTML);
-    if (tableHeaders[i].innerHTML.includes("nascar-pts-ext")) {
-      continue;
+  let standingsTableLabels = document.querySelectorAll(".Table2__Title, .Table2__table__caption");
+  let tables = [];
+  standingsTableLabels.forEach(function(label) {
+    let dataTable = label.parentNode.parentNode.querySelector(".Table2__table-scroller");
+    if (label.textContent.includes("Season Stats")) {
+      let nameTable = label.parentNode.querySelector(".Table2__table-fixed");
+      tables.push({"dataTable": dataTable, "isWeird": true, "nameTable": nameTable});
+    } else {
+      tables.push({"dataTable": dataTable, "isWeird": false});
     }
-    var child = document.createElement('th');
-    child.classList.add("Table2__th", "nascar-pts-ext");
-    child.innerHTML = '<div title="NASCAR Points" class="jsx-2810852873 table--cell header"><span>NP</span></div>';
-    tableHeaders[i].appendChild(child);
-    
-    var child2 = document.createElement('th');
-    child2.classList.add("Table2__th", "nascar-pts-ext");
-    child2.innerHTML = '<div title="Adjusted NASCAR Points" class="jsx-2810852873 table--cell header"><span>ANP</span></div>';
-    tableHeaders[i].appendChild(child2);
-  }
-
-  
-  
-  var tableDataRows = document.getElementsByClassName('Table2__tr Table2__tr--md Table2__odd');
-
-  chrome.storage.local.get(['scoreData', 'pointsPerWin'], function(storedData) {
-    // console.log('Value currently is ' + result.key);
-      
-    scoreData = storedData.scoreData;
-    console.log(storedData);
-    var pointsPerWin = (storedData.pointsPerWin !== undefined) ? storedData.pointsPerWin : 14;
-    for (var i = 0, l = tableDataRows.length; i < l; i++) {
-      var teamName = tableDataRows[i].getElementsByClassName("teamName truncate")[0].getAttribute("title");
-      var score = (scoreData.totals[teamName])? scoreData.totals[teamName].total_NP : 0;
-      var wins = (scoreData.totals[teamName])? scoreData.totals[teamName].wins : 0;
-      var adj_score = score + wins*pointsPerWin;
-      
-      var NPChild = tableDataRows[i].querySelector("#NP"+i.toString())
-      if (NPChild) {
-        NPChild.innerHTML = score.toString();
+  });
+  tables.forEach(function(tableInfo) {
+    let table = tableInfo.dataTable;
+    let isWeird = tableInfo.isWeird;
+    let tableHeaders;
+    if (isWeird) {
+      tableHeaders = table.getElementsByClassName("Table2__sub-header Table2__thead");
+    } else {
+      tableHeaders = table.getElementsByClassName('Table2__header-row Table2__tr Table2__even');
+    }
+ 
+    for (var i = 0, l = tableHeaders.length; i < l; i++) {
+      if (tableHeaders[i].innerHTML.includes("nascar-pts-ext")) {
+        continue;
+      }
+      var child = document.createElement('th');
+      child.classList.add("Table2__th", "nascar-pts-ext");
+      child.innerHTML = '<div title="NASCAR Points" class="jsx-2810852873 table--cell header"><span>NP</span></div>';
+      if (isWeird) {
+        tableHeaders[i].firstChild.appendChild(child);
       } else {
-        let child = document.createElement('th');
-        child.classList.add("Table2__td", "nascar-pts-ext");
-        child.innerHTML = '<div id="NP'+i.toString()+'" title="NASCAR Points" class="jsx-2810852873 table--cell fw-bold">' + score.toString() + '</div>';
-        tableDataRows[i].appendChild(child);
+        tableHeaders[i].appendChild(child);
       }
       
-      var ANPChild = tableDataRows[i].querySelector("#ANP"+i.toString())
-      if (ANPChild) {
-        ANPChild.innerHTML = adj_score.toString();
+      var child2 = document.createElement('th');
+      child2.classList.add("Table2__th", "nascar-pts-ext");
+      child2.innerHTML = '<div title="Adjusted NASCAR Points" class="jsx-2810852873 table--cell header"><span>ANP</span></div>';
+      if (isWeird) {
+        tableHeaders[i].firstChild.appendChild(child2);
       } else {
-        let child2 = document.createElement('th');
-        child2.classList.add("Table2__td", "nascar-pts-ext");
-        child2.innerHTML = '<div id="ANP'+i.toString()+'" title="Adjusted NASCAR Points" class="jsx-2810852873 table--cell fw-bold">' + adj_score.toString() + '</div>';
-        tableDataRows[i].appendChild(child2);
+        tableHeaders[i].appendChild(child2);
       }
-
     }
-    createWeeklyBreakdownTable(scoreData, pointsPerWin);
 
+    let tableDataRows;
+    if (isWeird) {
+      tableDataRows = table.getElementsByClassName("Table2__tr Table2__tr--md Table2__even");
+    } else {
+      tableDataRows = table.getElementsByClassName('Table2__tr Table2__tr--md Table2__odd');
+    }
+    chrome.storage.local.get(['scoreData', 'pointsPerWin'], function(storedData) {
+      scoreData = storedData.scoreData;
+      console.log(storedData);
+      var pointsPerWin = (storedData.pointsPerWin !== undefined) ? storedData.pointsPerWin : 14;
+      for (var i = 0, l = tableDataRows.length; i < l; i++) {
+        var teamName;
+        if (isWeird) {
+          let nameTableDataRows = tableInfo.nameTable.getElementsByClassName("Table2__tr Table2__tr--md Table2__even");
+          teamName = nameTableDataRows[i].getElementsByClassName("teamName truncate")[0].getAttribute("title");
+        }  else {
+          teamName = tableDataRows[i].getElementsByClassName("teamName truncate")[0].getAttribute("title");
+        }
+        var score = (scoreData.totals[teamName])? scoreData.totals[teamName].total_NP : 0;
+        var wins = (scoreData.totals[teamName])? scoreData.totals[teamName].wins : 0;
+        var adj_score = score + wins*pointsPerWin;
+        
+        var NPChild = tableDataRows[i].querySelector("#NP"+i.toString())
+        if (NPChild) {
+          NPChild.innerHTML = score.toString();
+        } else {
+          let child = document.createElement('th');
+          child.classList.add("Table2__td", "nascar-pts-ext");
+          child.innerHTML = '<div id="NP'+i.toString()+'" title="NASCAR Points" class="jsx-2810852873 table--cell fw-bold">' + score.toString() + '</div>';
+          tableDataRows[i].appendChild(child);
+        }
+        
+        var ANPChild = tableDataRows[i].querySelector("#ANP"+i.toString())
+        if (ANPChild) {
+          ANPChild.innerHTML = adj_score.toString();
+        } else {
+          let child2 = document.createElement('th');
+          child2.classList.add("Table2__td", "nascar-pts-ext");
+          child2.innerHTML = '<div id="ANP'+i.toString()+'" title="Adjusted NASCAR Points" class="jsx-2810852873 table--cell fw-bold">' + adj_score.toString() + '</div>';
+          tableDataRows[i].appendChild(child2);
+        }
+
+      }
+      createWeeklyBreakdownTable(scoreData, pointsPerWin);
+
+    });
   });
   
   let table = document.querySelector(".Table2__tbody");
@@ -394,7 +427,7 @@ function showNascarData() {
   }
   
   var regularSeasonButton = document.querySelector(".btn.standings_page_regular_season");
-  if (regularSeasonButton.getAttribute("regular-season-button-listener") !== 'true') {
+  if (regularSeasonButton && regularSeasonButton.getAttribute("regular-season-button-listener") !== 'true') {
     regularSeasonButton.setAttribute("regular-season-button-listener", 'true');
     regularSeasonButton.addEventListener("click", function() {
       removeNascarData();
@@ -403,7 +436,7 @@ function showNascarData() {
     });
   }
   var finalStandingsButton = document.querySelector(".btn.standings_page_final_standings");
-  if (finalStandingsButton.getAttribute("final-standings-button-listener") !== 'true') {
+  if (finalStandingsButton && finalStandingsButton.getAttribute("final-standings-button-listener") !== 'true') {
     finalStandingsButton.setAttribute("final-standings-button-listener", 'true');
     finalStandingsButton.addEventListener("click", function() {
       removeNascarData();
