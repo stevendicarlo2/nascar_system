@@ -1,3 +1,4 @@
+console.log("starting getScheduleData");
 if (!window.sleep) {
   window.sleep = (milliseconds) => {
     return new Promise(resolve => setTimeout(resolve, milliseconds))
@@ -12,22 +13,26 @@ async function getData() {
     await window.sleep(500);
     weeks = document.getElementsByClassName("matchup--table");
   }
+  console.log("got weeks, length" + weeks.length);
   var scoreData = {}
   for (var i=0; i<weeks.length; i++) {
     var week = weeks[i];
     var weekName = week.getElementsByClassName("table-caption dib")[0].innerHTML;
+    console.log("weekName:" + weekName);
     if (weekName.includes("Playoff")) {
       continue;
     }
     // console.log(week);
     var weekData = {}
-    var tableBody = week.getElementsByClassName("Table2__tbody")[0];
+    var tableBody = week.getElementsByClassName("Table__TBODY")[0];
     var teamNames = tableBody.getElementsByClassName("teamName truncate");
     var weekScores = tableBody.getElementsByClassName("result-column");
     // console.log(teamNames.length);
     // console.log(weekScores.length);
     
     var includeWeek = false;
+    console.log("teamNames length" + teamNames.length);
+
     for (var j=0; j<teamNames.length; j++) {
       var name = teamNames[j].getAttribute("title");
       var scoreEntry = weekScores[j].querySelector(".link");

@@ -43,7 +43,7 @@ function createWeeklyBreakdownTable(scoreData, pointsPerWin, useNascarPoints = t
   if (doubleTableBase) {
     base = doubleTableBase;
   } else {
-    let defaultTable = document.querySelector(".Table2__tbody");
+    let defaultTable = document.querySelector(".Table__TBODY");
     base = defaultTable.parentNode.parentNode;
   }
   // let shadowHost = document.createElement("div");
@@ -307,10 +307,11 @@ function highlightTable() {
 
 async function showNascarDataWhenReady() {
   await waitUntilHeaders();
-  var newContents = document.querySelector(".Table2__tbody").innerHTML;
+  console.log("done waiting until headers");
+  var newContents = document.querySelector(".Table__TBODY").innerHTML;
   var newContentsHash = newContents.hashCode();
   while (window.tableContentsHash == newContentsHash) {
-    newContents = document.querySelector(".Table2__tbody").innerHTML;
+    newContents = document.querySelector(".Table__TBODY").innerHTML;
     newContentsHash = newContents.hashCode();
     await window.sleep(500);
   }
@@ -319,25 +320,41 @@ async function showNascarDataWhenReady() {
 
 function showNascarData() {
   console.log("starting showNascarData");
-  let standingsTableLabels = document.querySelectorAll(".Table2__Title, .Table2__table__caption");
+  let standingsTableTitleLabels = document.querySelectorAll(".Table__Title");
+  let standingsTableCaptionLabels = document.querySelectorAll(".Table__Caption");
   let tables = [];
-  standingsTableLabels.forEach(function(label) {
-    let dataTable = label.parentNode.parentNode.querySelector(".Table2__table-scroller");
+  console.log("got standingsTableLabels");
+  console.log(standingsTableTitleLabels);
+  console.log(standingsTableCaptionLabels);
+
+  standingsTableTitleLabels.forEach(function(label) {
+    let dataTable = label.parentNode.querySelector(".Table__Scroller .Table");
     if (label.textContent.includes("Season Stats")) {
-      let nameTable = label.parentNode.querySelector(".Table2__table-fixed");
+      let nameTable = label.parentNode.querySelector(".Table--fixed");
       tables.push({"dataTable": dataTable, "isWeird": true, "nameTable": nameTable});
     } else {
       tables.push({"dataTable": dataTable, "isWeird": false});
     }
   });
+  standingsTableCaptionLabels.forEach(function(label) {
+    let dataTable = label.parentNode.parentNode.querySelector(".Table");
+    if (label.textContent.includes("Season Stats")) {
+      let nameTable = label.parentNode.querySelector(".Table--fixed");
+      tables.push({"dataTable": dataTable, "isWeird": true, "nameTable": nameTable});
+    } else {
+      tables.push({"dataTable": dataTable, "isWeird": false});
+    }
+  });
+  console.log("got tables");
+  console.log(tables);
   tables.forEach(function(tableInfo) {
     let table = tableInfo.dataTable;
     let isWeird = tableInfo.isWeird;
     let tableHeaders;
     if (isWeird) {
-      tableHeaders = table.getElementsByClassName("Table2__sub-header Table2__thead");
+      tableHeaders = table.getElementsByClassName("Table__sub-header Table__THEAD");
     } else {
-      tableHeaders = table.getElementsByClassName('Table2__header-row Table2__tr Table2__even');
+      tableHeaders = table.getElementsByClassName('Table__TR Table__even');
     }
  
     for (var i = 0, l = tableHeaders.length; i < l; i++) {
@@ -345,7 +362,7 @@ function showNascarData() {
         continue;
       }
       var child = document.createElement('th');
-      child.classList.add("Table2__th", "nascar-pts-ext");
+      child.classList.add("Table__TH", "nascar-pts-ext");
       child.innerHTML = '<div title="NASCAR Points" class="jsx-2810852873 table--cell header"><span>NP</span></div>';
       if (isWeird) {
         tableHeaders[i].firstChild.appendChild(child);
@@ -354,7 +371,7 @@ function showNascarData() {
       }
       
       var child2 = document.createElement('th');
-      child2.classList.add("Table2__th", "nascar-pts-ext");
+      child2.classList.add("Table__TH", "nascar-pts-ext");
       child2.innerHTML = '<div title="Adjusted NASCAR Points" class="jsx-2810852873 table--cell header"><span>ANP</span></div>';
       if (isWeird) {
         tableHeaders[i].firstChild.appendChild(child2);
@@ -365,9 +382,9 @@ function showNascarData() {
 
     let tableDataRows;
     if (isWeird) {
-      tableDataRows = table.getElementsByClassName("Table2__tr Table2__tr--md Table2__even");
+      tableDataRows = table.getElementsByClassName("Table__TR Table__TR--md Table__even");
     } else {
-      tableDataRows = table.getElementsByClassName('Table2__tr Table2__tr--md Table2__odd');
+      tableDataRows = table.getElementsByClassName('Table__TR Table__TR--md Table__odd');
     }
     chrome.storage.local.get(['scoreData', 'pointsPerWin'], function(storedData) {
       scoreData = storedData.scoreData;
@@ -376,7 +393,7 @@ function showNascarData() {
       for (var i = 0, l = tableDataRows.length; i < l; i++) {
         var teamName;
         if (isWeird) {
-          let nameTableDataRows = tableInfo.nameTable.getElementsByClassName("Table2__tr Table2__tr--md Table2__even");
+          let nameTableDataRows = tableInfo.nameTable.getElementsByClassName("Table__TR Table__TR--md Table__even");
           teamName = nameTableDataRows[i].getElementsByClassName("teamName truncate")[0].getAttribute("title");
         }  else {
           teamName = tableDataRows[i].getElementsByClassName("teamName truncate")[0].getAttribute("title");
@@ -389,8 +406,8 @@ function showNascarData() {
         if (NPChild) {
           NPChild.innerHTML = score.toString();
         } else {
-          let child = document.createElement('th');
-          child.classList.add("Table2__td", "nascar-pts-ext");
+          let child = document.createElement('td');
+          child.classList.add("Table__TD", "nascar-pts-ext");
           child.innerHTML = '<div id="NP'+i.toString()+'" title="NASCAR Points" class="jsx-2810852873 table--cell fw-bold">' + score.toString() + '</div>';
           tableDataRows[i].appendChild(child);
         }
@@ -399,8 +416,8 @@ function showNascarData() {
         if (ANPChild) {
           ANPChild.innerHTML = adj_score.toString();
         } else {
-          let child2 = document.createElement('th');
-          child2.classList.add("Table2__td", "nascar-pts-ext");
+          let child2 = document.createElement('td');
+          child2.classList.add("Table__TD", "nascar-pts-ext");
           child2.innerHTML = '<div id="ANP'+i.toString()+'" title="Adjusted NASCAR Points" class="jsx-2810852873 table--cell fw-bold">' + adj_score.toString() + '</div>';
           tableDataRows[i].appendChild(child2);
         }
@@ -411,7 +428,7 @@ function showNascarData() {
     });
   });
   
-  let table = document.querySelector(".Table2__tbody");
+  let table = document.querySelector(".Table__TBODY");
   if (!table.parentNode.parentNode.querySelector(".refreshScoresButton")) {
     let refreshButton = document.createElement('button');
     refreshButton.setAttribute("type", "button");
@@ -431,7 +448,7 @@ function showNascarData() {
     regularSeasonButton.setAttribute("regular-season-button-listener", 'true');
     regularSeasonButton.addEventListener("click", function() {
       removeNascarData();
-      window.tableContentsHash = document.querySelector(".Table2__tbody").innerHTML.hashCode();
+      window.tableContentsHash = document.querySelector(".Table__TBODY").innerHTML.hashCode();
       showNascarDataWhenReady();
     });
   }
@@ -440,7 +457,7 @@ function showNascarData() {
     finalStandingsButton.setAttribute("final-standings-button-listener", 'true');
     finalStandingsButton.addEventListener("click", function() {
       removeNascarData();
-      window.tableContentsHash = document.querySelector(".Table2__tbody").innerHTML.hashCode();
+      window.tableContentsHash = document.querySelector(".Table__TBODY").innerHTML.hashCode();
       showNascarDataWhenReady();
     });
   }
@@ -466,10 +483,11 @@ chrome.runtime.onMessage.addListener(
 );
 
 async function waitUntilHeaders() {
-  var headers = document.getElementsByClassName('Table2__tr Table2__tr--md Table2__odd');
+  var headers = document.getElementsByClassName('Table__TR Table__TR--md Table__odd');
   while (headers.length === 0) {
     await window.sleep(500);
-    headers = document.getElementsByClassName('Table2__tr Table2__tr--md Table2__odd');
+    console.log("checking for headers again");
+    headers = document.getElementsByClassName('Table__TR Table__TR--md Table__odd');
   }
   return;
 }
@@ -498,7 +516,7 @@ async function onloadFunc() {
     selector.addEventListener("change", function(e) {
       var newYear = e.target.value;
       removeNascarData();
-      window.tableContentsHash = document.querySelector(".Table2__tbody").innerHTML.hashCode();
+      window.tableContentsHash = document.querySelector(".Table__TBODY").innerHTML.hashCode();
       chrome.runtime.sendMessage({
         action: "loadScores",
         year: newYear
