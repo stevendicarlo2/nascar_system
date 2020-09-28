@@ -51,9 +51,12 @@ function processScores(rawData) {
 }
 
 function loadScores(year, override) {
-  chrome.cookies.get({"url": "https://fantasy.espn.com", "name": "kona_v3_environment_season_ffl"}, function(cookie) {
+  chrome.cookies.get({"url": "https://fantasy.espn.com", "name": "kona_v3_teamcontrol_ffl"}, function(cookie) {
     let cookieInfo = JSON.parse(cookie.value);
-    let seasonId = (year) ? year : (cookieInfo["seasonId"] || 2019);
+    let seasonId = (year) ? year : (cookieInfo["seasonId"] || 2020);
+    console.log("seasonId: " + cookieInfo["seasonId"]);
+    console.log("cookieInfo:");
+    console.log(cookieInfo);
     let leagueId = cookieInfo["leagueId"];
     
     console.log("in loadScores");
@@ -72,6 +75,7 @@ function loadScores(year, override) {
         let scheduleURL = "https://fantasy.espn.com/football/league/schedule?leagueId=" + leagueId.toString() + "&seasonId=" + seasonId.toString();
         chrome.tabs.create({ url: scheduleURL, active: false }, function (tab) {
           tabID = tab.id;
+          console.log("seasonID: " + seasonId.toString());
           chrome.tabs.executeScript(tab.id, { code: "var seasonId = " + seasonId.toString() }, function() {
             chrome.tabs.executeScript(tab.id, { file: "getScheduleData.js" })
           });
