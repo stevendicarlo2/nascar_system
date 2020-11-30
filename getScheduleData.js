@@ -49,6 +49,7 @@ async function getData() {
       var oppIndex = (j%2 === 0) ? j+1 : j-1;
       
       var oppScoreEntry = weekScores[oppIndex].querySelector(".link");
+      var oppName = teamNames[oppIndex].getAttribute("title")
       var oppScore = parseFloat(oppScoreEntry.innerHTML);
 
       console.log("weekScores:");
@@ -66,7 +67,7 @@ async function getData() {
       
       // console.log(name);
       // console.log(score);
-      weekData[name] = {"score": score, "wins": wins};
+      weekData[name] = {"score": score, "wins": wins, "oppScore": oppScore, "oppName": oppName};
     }
     console.log(weekData);
     if (includeWeek) {
