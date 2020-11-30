@@ -64,6 +64,10 @@ function createWeeklyBreakdownTable(scoreData, pointsPerWin, useNascarPoints = t
   shadowRoot.innerHTML += '<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>';
   shadowRoot.innerHTML += '<script type="text/javascript" src="datatables/mdb.min.js"></script>';
   shadowRoot.innerHTML += '<script type="text/javascript" src="datatables/datatables.min.js"></script>';
+
+  let chartRoot = document.createElement("div")
+  chartRoot.innerHTML += `<canvas id="myChart" width="400" height="400"></canvas>`;
+  shadowRoot.appendChild(chartRoot);
   
   let container = document.createElement("div");
   container.classList.add("myDataTable");
@@ -143,6 +147,7 @@ function createWeeklyBreakdownTable(scoreData, pointsPerWin, useNascarPoints = t
   
 
   $(document).ready(function () {
+    insertScoringChart(scoreData);
     if ($.fn.dataTable.isDataTable('#weekly_breakdown_table')) {
       $('#weekly_breakdown_table').DataTable();
     } else {
