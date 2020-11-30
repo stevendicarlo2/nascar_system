@@ -47,10 +47,22 @@ async function getData() {
 
       var wins;
       var oppIndex = (j%2 === 0) ? j+1 : j-1;
+      
+      var oppScoreEntry = weekScores[oppIndex].querySelector(".link");
+      var oppScore = parseFloat(oppScoreEntry.innerHTML);
 
-      if (weekScores[j].classList.contains("winnerTeam")) { wins = 1; }
-      else if (weekScores[oppIndex].classList.contains("winnerTeam")) { wins = 0; }
-      else { wins = .5; }        
+      console.log("weekScores:");
+      console.log(weekScores);
+      console.log("score" + score);
+      console.log("opp score" + oppScore);
+
+      // if (weekScores[j].classList.contains("winnerTeam")) { wins = 1; }
+      // else if (weekScores[oppIndex].classList.contains("winnerTeam")) { wins = 0; }
+      // else { wins = .5; }    
+      
+      if (score > oppScore) { wins = 1; }
+      else if (score < oppScore) { wins = 0; }
+      else { wins = .5; }    
       
       // console.log(name);
       // console.log(score);
