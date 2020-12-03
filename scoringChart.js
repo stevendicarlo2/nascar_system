@@ -46,16 +46,37 @@ function insertScoringChart(scoreData, pointsPerWin) {
     chartContainer.innerHTML += `<canvas id="myChart" width="400" height="400"></canvas>`;
     chartRoot.appendChild(chartContainer);
 
-    let teamFilter = createTeamFilterItem(scoreData);
+    var ctx = document.getElementById('myChart').getContext('2d');
+    let chart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: [],
+        datasets: []
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          yAxes: [{
+            ticks: {
+              beginAtZero: true,
+              max: 14
+            }
+          }]
+        }
+      }
+    })
+    
+    let teamFilter = createTeamFilterItem(chart, scoreData, pointsPerWin);
     if (teamFilter != null) {
       chartRoot.appendChild(teamFilter);
     }
-    updateScoringChart(scoreData, pointsPerWin);
+
+    updateScoringChart(chart, scoreData, pointsPerWin);
   })
 }
 
-function updateScoringChart(scoreData, pointsPerWin) {
-  var ctx = document.getElementById('myChart').getContext('2d');
+function updateScoringChart(chart, scoreData, pointsPerWin) {
   var chartLabels = []
   for (let week in scoreData.weekly_breakdown) {
     if (week === "storedTime") {
@@ -90,24 +111,9 @@ function updateScoringChart(scoreData, pointsPerWin) {
   
   console.log("chartDataSets:", chartDataSets);
   
-  var myChart = new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels: chartLabels,
-      datasets: chartDataSets
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      scales: {
-        yAxes: [{
-          ticks: {
-            beginAtZero: true
-          }
-        }]
-      }
-    }
-  })
+  chart.data.labels = chartLabels;
+  chart.data.datasets = chartDataSets;
+  chart.update(0);
 }
 
 function getFilteredScoreData(scoreData) {
@@ -134,7 +140,7 @@ function getFilteredScoreData(scoreData) {
   return copiedScoreData;
 }
 
-function createTeamFilterItem(scoreData) {
+function createTeamFilterItem(chart, scoreData, pointsPerWin) {
   if (document.getElementById("teamFilter")) {
     return null;
   }
@@ -148,7 +154,7 @@ function createTeamFilterItem(scoreData) {
     teamOption.setAttribute("value", team);
     teamOption.onclick = function() {
       teamOption.setAttribute("selected", true);
-      updateScoringChart(scoreData);
+      updateScoringChart(chart, scoreData, pointsPerWin);
     };
 
     selectorRoot.appendChild(teamOption);
