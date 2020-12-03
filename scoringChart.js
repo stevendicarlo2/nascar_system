@@ -1,4 +1,40 @@
+String.prototype.hashCode = function() {
+  var hash = 0, i, chr;
+  if (this.length === 0) return hash;
+  for (i = 0; i < this.length; i++) {
+    chr   = this.charCodeAt(i);
+    hash  = ((hash << 5) - hash) + chr;
+    hash |= 0; // Convert to 32bit integer
+  }
+  return hash;
+};
 
+function shouldInvert(hash) {
+  let r = (hash & 0x00FF0000) >> 16;
+  let g = (hash & 0x0000FF00) >> 8;
+  let b = (hash & 0x000000FF) >> 0;
+  let brightness = (299*r + 587*g + 114*b) / 1000;
+  // (the hardcoded value is Annie's because it's ugly)
+  return (brightness > 230 || brightness == 143.398);
+}
+
+function invertHex(hex) {
+  return (Number(`0x1${hex}`) ^ 0xFFFFFF).toString(16).substr(1).toUpperCase()
+}
+
+function intToRGB(i){
+  let c = (i & 0x00FFFFFF)
+    .toString(16)
+    .toUpperCase();
+
+  let rgbString = "00000".substring(0, 6 - c.length) + c;
+  if (shouldInvert(i)) {
+    return invertHex(rgbString);
+  }
+  else {
+    return rgbString;
+  }
+}
 
 function insertScoringChart(scoreData, pointsPerWin) {
   console.log("in insertScoringChart");
@@ -25,17 +61,20 @@ function updateScoringChart(scoreData, pointsPerWin) {
     if (week === "storedTime") {
       continue;
     }
-    chartLabels.push(week)
+    chartLabels.push((parseInt(week) + 1).toString())
   }
   
   let filteredScoreData = getFilteredScoreData(scoreData);
 
   var chartDataSets = []
   for (let team in filteredScoreData.totals) {
+    let teamColor = "#" + intToRGB(team.hashCode());
     var teamDataSet = {
       label: team,
-      borderColor: [Math.floor(Math.random()*16777215).toString(16)],
-      borderWidth: 1
+      borderColor: teamColor,
+      borderWidth: 5,
+      fill: false,
+      lineTension: .1
     }
     var teamData = []
     for (let week in filteredScoreData.weekly_breakdown) {
