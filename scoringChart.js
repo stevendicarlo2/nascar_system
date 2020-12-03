@@ -122,11 +122,11 @@ function getFilteredScoreData(scoreData) {
     weekly_breakdown: {}
   };
   let teamFilter = document.getElementById("teamFilter");
-  let teamOptions = teamFilter.querySelectorAll("option");
+  let teamOptions = teamFilter.querySelectorAll("li");
   
   teamOptions.forEach(function(teamOption) {
-    let teamName = teamOption.value;
-    if (teamOption.selected == true) {
+    let teamName = teamOption.getAttribute("value");
+    if (teamOption.classList.contains("active")) {
       copiedScoreData.totals[teamName] = scoreData.totals[teamName];
       for (let week in scoreData.weekly_breakdown) {
         if (copiedScoreData.weekly_breakdown[week] == undefined) {
@@ -144,16 +144,23 @@ function createTeamFilterItem(chart, scoreData, pointsPerWin) {
   if (document.getElementById("teamFilter")) {
     return null;
   }
-  let selectorRoot = document.createElement("select");
+  let selectorRoot = document.createElement("ul");
+  selectorRoot.classList.add("list-group")
   selectorRoot.id = "teamFilter";
   selectorRoot.setAttribute("multiple", "");
   
   for (let team in scoreData.totals) {
-    let teamOption = document.createElement("option");
+    let teamOption = document.createElement("li");
+    teamOption.classList.add("list-group-item");
     teamOption.innerHTML = team;
     teamOption.setAttribute("value", team);
     teamOption.onclick = function() {
-      teamOption.setAttribute("selected", true);
+      if (teamOption.classList.contains("active")) {
+        teamOption.classList.remove("active");
+      }
+      else {
+        teamOption.classList.add("active");
+      }
       updateScoringChart(chart, scoreData, pointsPerWin);
     };
 
