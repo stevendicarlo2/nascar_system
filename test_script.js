@@ -65,8 +65,8 @@ function createWeeklyBreakdownTable(scoreData, pointsPerWin, useNascarPoints = t
   shadowRoot.innerHTML += '<script type="text/javascript" src="datatables/mdb.min.js"></script>';
   shadowRoot.innerHTML += '<script type="text/javascript" src="datatables/datatables.min.js"></script>';
 
-  let chartRoot = document.createElement("div")
-  chartRoot.innerHTML += `<canvas id="myChart" width="400" height="400"></canvas>`;
+  let chartRoot = document.createElement("div");
+  chartRoot.id = "chartRoot";
   shadowRoot.appendChild(chartRoot);
   
   let container = document.createElement("div");
