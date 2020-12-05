@@ -144,12 +144,25 @@ function createTeamFilterItem(chart, scoreData, pointsPerWin) {
   if (document.getElementById("teamFilter")) {
     return null;
   }
-  let selectorRoot = document.createElement("ul");
-  selectorRoot.classList.add("list-group")
+  let selectorRoot = document.createElement("div");
   selectorRoot.id = "teamFilter";
-  selectorRoot.setAttribute("multiple", "");
   
+  var listRoot = document.createElement("ul");
+  selectorRoot.appendChild(listRoot);
+  listRoot.classList.add("list-group", "team-filter-group");
+  
+  // There are 3 roughly equally-sized columns of teams in the selector
+  var heightCounter = 0;
+  let teamCount = Object.keys(scoreData.totals).length;
+  let maxHeight = Math.ceil(teamCount/3);
   for (let team in scoreData.totals) {
+    if (heightCounter >= maxHeight) {
+      listRoot = document.createElement("ul");
+      selectorRoot.appendChild(listRoot);
+      listRoot.classList.add("list-group", "team-filter-group");
+      heightCounter = 0;
+    }
+    
     let teamOption = document.createElement("li");
     teamOption.classList.add("list-group-item");
     teamOption.innerHTML = team;
@@ -164,7 +177,8 @@ function createTeamFilterItem(chart, scoreData, pointsPerWin) {
       updateScoringChart(chart, scoreData, pointsPerWin);
     };
 
-    selectorRoot.appendChild(teamOption);
+    heightCounter += 1;
+    listRoot.appendChild(teamOption);
   }
   
   return selectorRoot

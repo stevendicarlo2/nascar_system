@@ -91,3 +91,11 @@ input:checked + .slider:before {
 .slider.round:before {
   border-radius: 50%;
 }
+
+#teamFilter {
+  display: flex;
+}
+
+.team-filter-group {
+  width: 33%;
+}
