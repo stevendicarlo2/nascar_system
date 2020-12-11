@@ -65,6 +65,70 @@ async function getData() {
       else if (score < oppScore) { wins = 0; }
       else { wins = .5; }    
       
+      // console.log("week: " ,i);
+      // 
+      // if (i == 12) {
+      //   if (name == "2-0  vs Brady") {
+      //     score = 109.0;
+      //     wins = 1;
+      //   }
+      //   else if (name == "Aaron Rodgers' Mustache") {
+      //     score = 101.9;
+      //     wins = 1;
+      //   }
+      //   else if (name == "Alvin and the Chipmunks") {
+      //     score = 101.6;
+      //     wins = 1;
+      //   }
+      //   else if (name == "Captain Bench") {
+      //     score = 106.6;
+      //     wins = 1;
+      //   }
+      //   else if (name == "Coach Bronco's Wild Ride") {
+      //     score = 87.8;
+      //     wins = 0;
+      //   }
+      //   else if (name == "Dalvin and Hobbes") {
+      //     score = 93.6;
+      //     wins = 1;
+      //   }
+      //   else if (name == "Harper Hempel Hemp") {
+      //     score = 93.9;
+      //     wins = 0;
+      //   }
+      //   else if (name == "Jones Town") {
+      //     score = 127.3;
+      //     wins = 1;
+      //   }
+      //   else if (name == "Kenyan Drake and Josh") {
+      //     score = 130.4;
+      //     wins = 0;
+      //   }
+      //   else if (name == "Take Mahomes Country Road") {
+      //     score = 82.6;
+      //     wins = 0;
+      //   }
+      //   else if (name == "The Real Slim Brady") {
+      //     score = 135.0;
+      //     wins = 1;
+      //   }
+      //   else if (name == "Where my Younghoes at") {
+      //     score = 98.2;
+      //     wins = 0;
+      //   }
+      //   else if (name == "the Adams family") {
+      //     score = 93.1;
+      //     wins = 0;
+      //   }
+      //   else if (name == "~ Liz,Lamar,noLex") {
+      //     score = 67.3;
+      //     wins = 0;
+      //   }
+      //   else {
+      //     console.log("THIS IS AN ISSUE: ", name);
+      //   }
+      // }
+      
       // console.log(name);
       // console.log(score);
       weekData[name] = {"score": score, "wins": wins, "oppScore": oppScore, "oppName": oppName};
