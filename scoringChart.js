@@ -91,36 +91,61 @@ function updateScoringChart(chart, scoreData, pointsPerWin) {
   }
   
   let filteredScoreData = getFilteredScoreData(scoreData);
-  let selectedPointTypeButton = document.querySelector("#scoreTypeSelector").querySelector("button.active");
+  let selectedPointTypeButtons = document.querySelector("#scoreTypeSelector").querySelectorAll("button.active");
 
   var chartDataSets = []
   for (let team in filteredScoreData.totals) {
     let teamColor = "#" + intToRGB(team.hashCode());
-    var teamDataSet = {
-      label: team,
-      borderColor: teamColor,
-      borderWidth: 5,
-      fill: false,
-      lineTension: .1
-    }
-    var teamData = []
-    for (let week in filteredScoreData.weekly_breakdown) {
-      if (week === "storedTime") {
-        continue;
-      }
-      let info = filteredScoreData.weekly_breakdown[week][team];
+    
+    selectedPointTypeButtons.forEach(function(selectedPointTypeButton, pointTypeIndex) {
+      let labelAnnotation;
       if (selectedPointTypeButton.value == "np") {
-        teamData.push(info.nascar_points)
+        labelAnnotation = "NP";
       }
       else if (selectedPointTypeButton.value == "anp") {
-        teamData.push(info.nascar_points + info.wins*pointsPerWin)
+        labelAnnotation = "ANP";
       }
       else if (selectedPointTypeButton.value == "points") {
-        teamData.push(info.score)
+        labelAnnotation = "POINTS";
       }
-    }
-    teamDataSet.data = teamData
-    chartDataSets.push(teamDataSet)
+      
+      let borderDash;
+      if (pointTypeIndex == 0) {
+        borderDash = [];
+      }
+      else if (pointTypeIndex == 1) {
+        borderDash = [15, 15];
+      }
+      else if (pointTypeIndex == 2) {
+        borderDash = [5, 5];
+      }
+      var dataSet = {
+        label: team + " " + labelAnnotation,
+        borderColor: teamColor,
+        borderWidth: 5,
+        borderDash: borderDash,
+        fill: false,
+        lineTension: .1
+      }
+      var teamData = []
+      for (let week in filteredScoreData.weekly_breakdown) {
+        if (week === "storedTime") {
+          continue;
+        }
+        let info = filteredScoreData.weekly_breakdown[week][team];
+        if (selectedPointTypeButton.value == "np") {
+          teamData.push(info.nascar_points)
+        }
+        else if (selectedPointTypeButton.value == "anp") {
+          teamData.push(info.nascar_points + info.wins*pointsPerWin)
+        }
+        else if (selectedPointTypeButton.value == "points") {
+          teamData.push(info.score)
+        }
+      }
+      dataSet.data = teamData
+      chartDataSets.push(dataSet)
+    })
   }
   
   console.log("chartDataSets:", chartDataSets);
@@ -233,11 +258,13 @@ function createScoreTypeSelector(chart, scoreData, pointsPerWin) {
     scoreButton.setAttribute("type", "button");
     scoreButton.setAttribute("data-toggle", "button");
     scoreButton.onclick = function() {
-      scoreButtons.forEach(function(newlyInactiveButton) {
-        newlyInactiveButton.classList.remove("active");
-      })
+      if (scoreButton.classList.contains("active")) {
+        scoreButton.classList.remove("active");
+      }
+      else {
+        scoreButton.classList.add("active");
+      }
       
-      scoreButton.classList.add("active");
       updateScoringChart(chart, scoreData, pointsPerWin);
     };
     scoreTypeButtonGroup.appendChild(scoreButton);
