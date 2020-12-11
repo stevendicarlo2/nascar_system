@@ -59,8 +59,8 @@ function insertScoringChart(scoreData, pointsPerWin) {
         scales: {
           yAxes: [{
             ticks: {
-              beginAtZero: true,
-              max: 14
+              // beginAtZero: true,
+              // max: 14
             }
           }]
         }
@@ -70,6 +70,11 @@ function insertScoringChart(scoreData, pointsPerWin) {
     let teamFilter = createTeamFilterItem(chart, scoreData, pointsPerWin);
     if (teamFilter != null) {
       chartRoot.appendChild(teamFilter);
+    }
+    
+    let scoreTypeSelector = createScoreTypeSelector(chart, scoreData, pointsPerWin);
+    if (scoreTypeSelector != null) {
+      chartRoot.appendChild(scoreTypeSelector);
     }
 
     updateScoringChart(chart, scoreData, pointsPerWin);
@@ -86,6 +91,7 @@ function updateScoringChart(chart, scoreData, pointsPerWin) {
   }
   
   let filteredScoreData = getFilteredScoreData(scoreData);
+  let selectedPointTypeButton = document.querySelector("#scoreTypeSelector").querySelector("button.active");
 
   var chartDataSets = []
   for (let team in filteredScoreData.totals) {
@@ -103,7 +109,15 @@ function updateScoringChart(chart, scoreData, pointsPerWin) {
         continue;
       }
       let info = filteredScoreData.weekly_breakdown[week][team];
-      teamData.push(info.nascar_points)
+      if (selectedPointTypeButton.value == "np") {
+        teamData.push(info.nascar_points)
+      }
+      else if (selectedPointTypeButton.value == "anp") {
+        teamData.push(info.nascar_points + info.wins*pointsPerWin)
+      }
+      else if (selectedPointTypeButton.value == "points") {
+        teamData.push(info.score)
+      }
     }
     teamDataSet.data = teamData
     chartDataSets.push(teamDataSet)
@@ -182,4 +196,52 @@ function createTeamFilterItem(chart, scoreData, pointsPerWin) {
   }
   
   return selectorRoot
+}
+
+function createScoreTypeSelector(chart, scoreData, pointsPerWin) {
+  if (document.getElementById("scoreTypeSelector")) {
+    return null;
+  }
+  let scoreTypeRoot = document.createElement("div");
+  scoreTypeRoot.id = "scoreTypeSelector";
+
+  let scoreTypeButtonGroup = document.createElement("div");
+  scoreTypeButtonGroup.classList.add("btn-group");
+  scoreTypeButtonGroup.setAttribute("role", "group");
+  scoreTypeRoot.appendChild(scoreTypeButtonGroup);
+  
+  var scoreButtons = [];
+
+  let npScoreButton = document.createElement("button");
+  npScoreButton.innerHTML = "NP";
+  npScoreButton.setAttribute("value", "np")
+  npScoreButton.classList.add("active");
+  scoreButtons.push(npScoreButton);
+  
+  let anpScoreButton = document.createElement("button");
+  anpScoreButton.innerHTML = "ANP";
+  anpScoreButton.setAttribute("value", "anp")
+  scoreButtons.push(anpScoreButton);
+  
+  let rawPointsScoreButton = document.createElement("button");
+  rawPointsScoreButton.innerHTML = "Raw Points";
+  rawPointsScoreButton.setAttribute("value", "points")
+  scoreButtons.push(rawPointsScoreButton);
+  
+  scoreButtons.forEach(function(scoreButton) {
+    scoreButton.classList.add("btn", "btn-secondary");
+    scoreButton.setAttribute("type", "button");
+    scoreButton.setAttribute("data-toggle", "button");
+    scoreButton.onclick = function() {
+      scoreButtons.forEach(function(newlyInactiveButton) {
+        newlyInactiveButton.classList.remove("active");
+      })
+      
+      scoreButton.classList.add("active");
+      updateScoringChart(chart, scoreData, pointsPerWin);
+    };
+    scoreTypeButtonGroup.appendChild(scoreButton);
+  })
+
+  return scoreTypeRoot;
 }

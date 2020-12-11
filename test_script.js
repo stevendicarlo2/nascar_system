@@ -128,7 +128,7 @@ function createWeeklyBreakdownTable(scoreData, pointsPerWin, useNascarPoints = t
   
 
   $(document).ready(function () {
-    insertScoringChart(scoreData);
+    insertScoringChart(scoreData, pointsPerWin);
     if ($.fn.dataTable.isDataTable('#weekly_breakdown_table')) {
       $('#weekly_breakdown_table').DataTable();
     } else {
