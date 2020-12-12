@@ -20,6 +20,9 @@ function processScores(rawData) {
   let scoreData = {"weekly_breakdown": rawData, "totals": {}};
   for (let weekNum in rawData) {
     let week = rawData[weekNum];
+    
+    // This is a list of entries containing each team's info for the week, 
+    // which will be sorted by points scored
     let weekRank = [];
     for (let owner in week) {
       if (!(owner in scoreData.totals)) {
@@ -29,9 +32,16 @@ function processScores(rawData) {
     }
     weekRank.sort(function(a, b) { return b.score-a.score });
     // console.log(weekRank);
+    
+    // For each entry in the sorted list, calculate the nascar points,
+    // and add the data to the weekly breakdown and totals list
     for (let i = 0; i < weekRank.length; i++) {
-      // console.log(scores[weekRank[i].name]);
       let score = weekRank[i].score;
+      
+      // Using the position in the array isn't quite good enough, because teams that tie
+      // need to share the nascar points earned.
+      // numTeams = the number of teams that share the same score
+      // accumPoints = the number of accumulated nascar points the tying teams earned
       let numTeams = 0;
       let accumPoints = 0.0;
       for (let j = 0; j < weekRank.length; j++) {
@@ -44,6 +54,14 @@ function processScores(rawData) {
       scoreData.weekly_breakdown[weekNum][weekRank[i].name].nascar_points = nascar_points;
       scoreData.totals[weekRank[i].name].total_NP += nascar_points;
       scoreData.totals[weekRank[i].name].wins += weekRank[i].wins;
+    }
+    
+    // Now that all the NP have been calculated, insert that info into the opponent's entry as well
+    let weeklyBreakdownInfo = scoreData.weekly_breakdown[weekNum];
+    for (let teamName in weeklyBreakdownInfo) {
+      let opponentName = weeklyBreakdownInfo[teamName].oppName;
+      let opponentNP = weeklyBreakdownInfo[opponentName].nascar_points;
+      weeklyBreakdownInfo[teamName].oppNP = opponentNP;
     }
     // console.log(JSON.stringify(scores));
   }
