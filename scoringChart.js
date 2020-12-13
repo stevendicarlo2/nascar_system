@@ -72,9 +72,9 @@ function insertScoringChart(scoreData, pointsPerWin) {
       chartRoot.appendChild(teamFilter);
     }
     
-    let scoreTypeSelector = createScoreTypeSelector(chart, scoreData, pointsPerWin);
-    if (scoreTypeSelector != null) {
-      chartRoot.appendChild(scoreTypeSelector);
+    let customizationToolbar = createCustomizationToolbar(chart, scoreData, pointsPerWin);
+    if (customizationToolbar != null) {
+      chartRoot.appendChild(customizationToolbar);
     }
 
     updateScoringChart(chart, scoreData, pointsPerWin);
@@ -92,7 +92,20 @@ function updateScoringChart(chart, scoreData, pointsPerWin) {
   
   let filteredScoreData = getFilteredScoreData(scoreData);
   let selectedPointTypeButtons = document.querySelector("#scoreTypeSelector").querySelectorAll("button.active");
-
+  let teamScoreButtons = document.querySelector("#opponentScoreSelector").querySelectorAll("button.active");
+  let includeTeamScore = false;
+  let includeOpponentScore = false;
+  
+  teamScoreButtons.forEach(function(button) {
+    let buttonValue = button.getAttribute("value");
+    if (buttonValue == "teamScore") {
+      includeTeamScore = true;
+    }
+    else if (buttonValue == "oppScore") {
+      includeOpponentScore = true;
+    }
+  })
+  
   var chartDataSets = []
   for (let team in filteredScoreData.totals) {
     let teamColor = "#" + intToRGB(team.hashCode());
@@ -127,7 +140,17 @@ function updateScoringChart(chart, scoreData, pointsPerWin) {
         fill: false,
         lineTension: .1
       }
+      var opponentDataSet = {
+        label: team + " OPP " + labelAnnotation,
+        borderColor: teamColor + "66",
+        borderWidth: 5,
+        borderDash: borderDash,
+        fill: false,
+        lineTension: .1
+      }
       var teamData = []
+      var opponentData = []
+
       for (let week in filteredScoreData.weekly_breakdown) {
         if (week === "storedTime") {
           continue;
@@ -135,16 +158,26 @@ function updateScoringChart(chart, scoreData, pointsPerWin) {
         let info = filteredScoreData.weekly_breakdown[week][team];
         if (selectedPointTypeButton.value == "np") {
           teamData.push(info.nascar_points)
+          opponentData.push(info.oppNP)
         }
         else if (selectedPointTypeButton.value == "anp") {
           teamData.push(info.nascar_points + info.wins*pointsPerWin)
+          opponentData.push(info.oppNP + (1-info.wins)*pointsPerWin)
         }
         else if (selectedPointTypeButton.value == "points") {
           teamData.push(info.score)
+          opponentData.push(info.oppScore)
         }
       }
       dataSet.data = teamData
-      chartDataSets.push(dataSet)
+      opponentDataSet.data = opponentData
+      
+      if (includeTeamScore) {
+        chartDataSets.push(dataSet)
+      }
+      if (includeOpponentScore) {
+        chartDataSets.push(opponentDataSet)
+      }
     })
   }
   
@@ -223,10 +256,26 @@ function createTeamFilterItem(chart, scoreData, pointsPerWin) {
   return selectorRoot
 }
 
-function createScoreTypeSelector(chart, scoreData, pointsPerWin) {
-  if (document.getElementById("scoreTypeSelector")) {
+function createCustomizationToolbar(chart, scoreData, pointsPerWin) {
+  if (document.getElementById("toolbarRoot")) {
     return null;
   }
+
+  let toolbarRoot = document.createElement("div");
+  toolbarRoot.id = "toolbarRoot";
+  toolbarRoot.classList.add("btn-toolbar");
+  toolbarRoot.setAttribute("role", "toolbar");
+  
+  let scoreTypeSelector = createScoreTypeSelector(chart, scoreData, pointsPerWin);
+  toolbarRoot.appendChild(scoreTypeSelector);
+  
+  let opponentScoreSelector = createOpponentScoreSelector(chart, scoreData, pointsPerWin);
+  toolbarRoot.appendChild(opponentScoreSelector);
+
+  return toolbarRoot;
+}
+
+function createScoreTypeSelector(chart, scoreData, pointsPerWin) {
   let scoreTypeRoot = document.createElement("div");
   scoreTypeRoot.id = "scoreTypeSelector";
 
@@ -271,4 +320,46 @@ function createScoreTypeSelector(chart, scoreData, pointsPerWin) {
   })
 
   return scoreTypeRoot;
+}
+
+function createOpponentScoreSelector(chart, scoreData, pointsPerWin) {
+  let opponentScoreSelector = document.createElement("div");
+  opponentScoreSelector.id = "opponentScoreSelector";
+
+  let opponentScoreButtonGroup = document.createElement("div");
+  opponentScoreButtonGroup.classList.add("btn-group");
+  opponentScoreButtonGroup.setAttribute("role", "group");
+  opponentScoreSelector.appendChild(opponentScoreButtonGroup);
+  
+  let buttons = [];
+
+  let teamScoreButton = document.createElement("button");
+  teamScoreButton.innerHTML = "Show selected team's data";
+  teamScoreButton.classList.add("active");
+  teamScoreButton.setAttribute("value", "teamScore");
+  buttons.push(teamScoreButton);
+
+  let opponentScoreButton = document.createElement("button");
+  opponentScoreButton.innerHTML = "Show opponent data";
+  opponentScoreButton.setAttribute("value", "oppScore");
+  buttons.push(opponentScoreButton);
+  
+  buttons.forEach(function(button) {
+    button.classList.add("btn", "btn-secondary");
+    button.setAttribute("type", "button");
+    button.setAttribute("data-toggle", "button");
+    button.onclick = function() {
+      if (button.classList.contains("active")) {
+        button.classList.remove("active");
+      }
+      else {
+        button.classList.add("active");
+      }
+      
+      updateScoringChart(chart, scoreData, pointsPerWin);
+    };
+    opponentScoreButtonGroup.appendChild(button);
+  })
+
+  return opponentScoreSelector;
 }
