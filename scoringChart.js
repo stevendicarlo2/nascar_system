@@ -76,6 +76,19 @@ function insertScoringChart(scoreData, pointsPerWin) {
     if (customizationToolbar != null) {
       chartRoot.appendChild(customizationToolbar);
     }
+    
+    let weekRange = createWeekRange(chart, scoreData, pointsPerWin);
+    if (weekRange != null) {
+      chartRoot.appendChild(weekRange);
+      // This jquery modification has to be done after appending the child into the DOM,
+      // it doesn't work when doing it before adding it to the DOM.
+      $( "#weekRangeRoot .weekRange" ).slider({
+        min: 1,
+        max: 13,
+        range: true,
+        values: [1, 13]
+      });
+    }
 
     updateScoringChart(chart, scoreData, pointsPerWin);
   })
@@ -362,4 +375,19 @@ function createOpponentScoreSelector(chart, scoreData, pointsPerWin) {
   })
 
   return opponentScoreSelector;
+}
+
+function createWeekRange(chart, scoreData, pointsPerWin) {
+  if (document.getElementById("weekRangeRoot")) {
+    return null;
+  }
+
+  let weekRangeRoot = document.createElement("div");
+  weekRangeRoot.id = "weekRangeRoot";
+  
+  let weekRange = document.createElement("div");
+  weekRange.classList.add("weekRange");
+  weekRangeRoot.appendChild(weekRange);
+  
+  return weekRangeRoot;
 }
