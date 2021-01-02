@@ -105,3 +105,12 @@ input:checked + .slider:before {
   height: 50px;
   margin-top: 20px;
 }
+
+#weekRangeRoot .weekRangeLabelContainer {
+  display: flex;
+  justify-content: space-between;
+}
+
+#weekRangeRoot .weekRangeLabel {
+  width: 20px;
+}

@@ -77,17 +77,12 @@ function insertScoringChart(scoreData, pointsPerWin) {
       chartRoot.appendChild(customizationToolbar);
     }
     
-    let weekRange = createWeekRange(chart, scoreData, pointsPerWin);
+    let weekRange = createWeekRange();
     if (weekRange != null) {
       chartRoot.appendChild(weekRange);
-      // This jquery modification has to be done after appending the child into the DOM,
+      // The jquery modification in this method has to be done after appending the child into the DOM,
       // it doesn't work when doing it before adding it to the DOM.
-      $( "#weekRangeRoot .weekRange" ).slider({
-        min: 1,
-        max: 13,
-        range: true,
-        values: [1, 13]
-      });
+      customizeWeekRange(chart, scoreData, pointsPerWin);
     }
 
     updateScoringChart(chart, scoreData, pointsPerWin);
@@ -377,7 +372,7 @@ function createOpponentScoreSelector(chart, scoreData, pointsPerWin) {
   return opponentScoreSelector;
 }
 
-function createWeekRange(chart, scoreData, pointsPerWin) {
+function createWeekRange() {
   if (document.getElementById("weekRangeRoot")) {
     return null;
   }
@@ -390,4 +385,27 @@ function createWeekRange(chart, scoreData, pointsPerWin) {
   weekRangeRoot.appendChild(weekRange);
   
   return weekRangeRoot;
+}
+
+function customizeWeekRange(chart, scoreData, pointsPerWin) {
+  // Subtract one here because one of the keys is for the last stored time
+  let numberOfWeeks = Object.keys(scoreData.weekly_breakdown).length - 1;
+
+  $( "#weekRangeRoot .weekRange" ).slider({
+    min: 1,
+    max: numberOfWeeks,
+    range: true,
+    values: [1, numberOfWeeks]
+  });
+  
+  let weekRangeRoot = document.getElementById("weekRangeRoot");
+  let weekRangeLabelContainer = document.createElement("div");
+  weekRangeLabelContainer.classList.add("weekRangeLabelContainer");
+  for (let i = 1; i <= numberOfWeeks; i++) {
+    let weekRangeLabel = document.createElement("div");
+    weekRangeLabel.classList.add("weekRangeLabel");
+    weekRangeLabel.innerHTML = i;
+    weekRangeLabelContainer.appendChild(weekRangeLabel);
+  }
+  weekRangeRoot.appendChild(weekRangeLabelContainer);
 }
