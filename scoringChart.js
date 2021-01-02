@@ -90,15 +90,16 @@ function insertScoringChart(scoreData, pointsPerWin) {
 }
 
 function updateScoringChart(chart, scoreData, pointsPerWin) {
+  let filteredScoreData = getFilteredScoreData(scoreData);
+
   var chartLabels = []
-  for (let week in scoreData.weekly_breakdown) {
+  for (let week in filteredScoreData.weekly_breakdown) {
     if (week === "storedTime") {
       continue;
     }
     chartLabels.push((parseInt(week) + 1).toString())
   }
   
-  let filteredScoreData = getFilteredScoreData(scoreData);
   let selectedPointTypeButtons = document.querySelector("#scoreTypeSelector").querySelectorAll("button.active");
   let teamScoreButtons = document.querySelector("#opponentScoreSelector").querySelectorAll("button.active");
   let includeTeamScore = false;
@@ -203,12 +204,18 @@ function getFilteredScoreData(scoreData) {
   };
   let teamFilter = document.getElementById("teamFilter");
   let teamOptions = teamFilter.querySelectorAll("li");
+  let weekMin = $( "#weekRangeRoot .weekRange" ).slider( "values", 0 );
+  let weekMax = $( "#weekRangeRoot .weekRange" ).slider( "values", 1 );
   
   teamOptions.forEach(function(teamOption) {
     let teamName = teamOption.getAttribute("value");
     if (teamOption.classList.contains("active")) {
       copiedScoreData.totals[teamName] = scoreData.totals[teamName];
       for (let week in scoreData.weekly_breakdown) {
+        let weekValue = parseInt(week) + 1;
+        if (weekValue < weekMin || weekValue > weekMax) {
+          continue;
+        }
         if (copiedScoreData.weekly_breakdown[week] == undefined) {
           copiedScoreData.weekly_breakdown[week] = {};
         }
@@ -392,6 +399,9 @@ function customizeWeekRange(chart, scoreData, pointsPerWin) {
   let numberOfWeeks = Object.keys(scoreData.weekly_breakdown).length - 1;
 
   $( "#weekRangeRoot .weekRange" ).slider({
+    change: function(event, ui) { 
+      updateScoringChart(chart, scoreData, pointsPerWin);
+    },
     min: 1,
     max: numberOfWeeks,
     range: true,
