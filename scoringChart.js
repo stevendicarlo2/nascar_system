@@ -38,9 +38,19 @@ function intToRGB(i){
 
 function insertScoringChart(scoreData, pointsPerWin) {
   console.log("in insertScoringChart");
-
   $(document).ready(function () {
-    let chartRoot = document.getElementById('chartRoot');
+    let shadowRoot = document.querySelector(".shadowRoot");
+    let existingChartRoot = shadowRoot.querySelector("#chartRoot");
+    
+    if (existingChartRoot != undefined) {
+      console.log("skipping insertScoringChart");
+      return
+    }
+
+    let chartRoot = document.createElement("div");
+    chartRoot.id = "chartRoot";
+    shadowRoot.appendChild(chartRoot);
+  
     let chartContainer = document.createElement("div");
     chartContainer.style = "position: relative; height:40vh; width:80vw";
     chartContainer.innerHTML += `<canvas id="myChart" width="400" height="400"></canvas>`;

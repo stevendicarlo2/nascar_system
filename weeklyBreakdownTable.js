@@ -4,9 +4,20 @@ if (!window.tableContentsHash) {
 }
 
 function removeWeeklyBreakdownTable() {
-  let existingTable = document.querySelector(".shadowRoot");
-  if (existingTable) {
-    existingTable.parentNode.removeChild(existingTable);
+  let existingTable = document.querySelector("#myDataTable");
+  if (existingTable.innerHTML != "") {
+    existingTable.innerHTML = ""
+  }
+  
+  let existingScoreSwitchLabel = document.querySelector("#scoreTypeSwitchLabel");
+  if (existingScoreSwitchLabel) {
+    existingScoreSwitchLabel.parentNode.removeChild(existingScoreSwitchLabel);
+  }
+  
+  let existingScoreSwitch = document.querySelector("#scoreTypeSwitch");
+  if (existingScoreSwitch) {
+    let scoreSwitchParent = existingScoreSwitch.parentNode;
+    scoreSwitchParent.parentNode.removeChild(scoreSwitchParent);
   }
 }
 
@@ -21,33 +32,21 @@ function recreateWeeklyBreakdownTable(useNascarPoints = true) {
 }
 
 function createWeeklyBreakdownTable(scoreData, pointsPerWin, useNascarPoints = true) {
-  removeWeeklyBreakdownTable();
-  let doubleTableBase = document.querySelector(".h2hTables");
-  let base;
-  if (doubleTableBase) {
-    base = doubleTableBase;
-  } else {
-    let defaultTable = document.querySelector(".Table__TBODY");
-    base = defaultTable.parentNode.parentNode;
-  }
-  // let shadowHost = document.createElement("div");
-  // shadowHost.id = "shadowHost";
-  // base.appendChild(shadowHost);
-  // let shadowRoot = shadowHost.attachShadow({ mode: "open"});
-  let shadowRoot = document.createElement("div");
-  shadowRoot.classList.add("shadowRoot");
-  base.appendChild(shadowRoot);
-  shadowRoot.innerHTML = '<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.2/css/all.css">';
-  shadowRoot.innerHTML += '<script type="text/javascript" src="datatables/mdb.min.js"></script>';
-  shadowRoot.innerHTML += '<script type="text/javascript" src="datatables/datatables.min.js"></script>';
-
-  let chartRoot = document.createElement("div");
-  chartRoot.id = "chartRoot";
-  shadowRoot.appendChild(chartRoot);
+  let shadowRoot = document.querySelector(".shadowRoot");
+  let container = shadowRoot.querySelector("#myDataTable");
   
-  let container = document.createElement("div");
-  container.classList.add("myDataTable");
-  shadowRoot.appendChild(container);
+  // There isn't a container yet, so create one
+  if (container == undefined) {
+    container = document.createElement("div");
+    container.id = "myDataTable";
+    shadowRoot.appendChild(container);
+  }
+  // There is a container already and it's full, we don't need to do anything
+  else if (container.innerHTML != "") {
+    console.log("skipping createWeeklyBreakdownTable");
+    return;    
+  }
+    
   let table = document.createElement("table");
   table.classList.add("table", "table-bordered", "table-sm");
   table.id = "weekly_breakdown_table";
@@ -116,14 +115,13 @@ function createWeeklyBreakdownTable(scoreData, pointsPerWin, useNascarPoints = t
     tbody.appendChild(row);
   }
   if (useNascarPoints) {
-    shadowRoot.innerHTML += '<label id="scoreTypeSwitchLabel" for="scoreTypeSwitch">Nascar Points</label><label class="switch"><input id="scoreTypeSwitch" type="checkbox" checked><span class="slider round"></span></label>';
+    container.innerHTML += '<label id="scoreTypeSwitchLabel" for="scoreTypeSwitch">Nascar Points</label><label class="switch"><input id="scoreTypeSwitch" type="checkbox" checked><span class="slider round"></span></label>';
   } else {
-    shadowRoot.innerHTML += '<label id="scoreTypeSwitchLabel" for="scoreTypeSwitch">Weekly Score</label><label class="switch"><input id="scoreTypeSwitch" type="checkbox"><span class="slider round"></span></label>';
+    container.innerHTML += '<label id="scoreTypeSwitchLabel" for="scoreTypeSwitch">Weekly Score</label><label class="switch"><input id="scoreTypeSwitch" type="checkbox"><span class="slider round"></span></label>';
   }
   
 
   $(document).ready(function () {
-    insertScoringChart(scoreData, pointsPerWin);
     if ($.fn.dataTable.isDataTable('#weekly_breakdown_table')) {
       $('#weekly_breakdown_table').DataTable();
     } else {

@@ -19,6 +19,23 @@ async function showNascarDataWhenReady() {
 
 function showNascarData() {
   console.log("starting showNascarData");
+  
+  // Creating structure for scoring table/chart
+  let doubleTableBase = document.querySelector(".h2hTables");
+  let base;
+  if (doubleTableBase) {
+    base = doubleTableBase;
+  } else {
+    let defaultTable = document.querySelector(".Table__TBODY");
+    base = defaultTable.parentNode.parentNode;
+  }
+  let shadowRoot = document.createElement("div");
+  shadowRoot.classList.add("shadowRoot");
+  base.appendChild(shadowRoot);
+  shadowRoot.innerHTML = '<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.2/css/all.css">';
+  shadowRoot.innerHTML += '<script type="text/javascript" src="datatables/mdb.min.js"></script>';
+  shadowRoot.innerHTML += '<script type="text/javascript" src="datatables/datatables.min.js"></script>';
+  
   let standingsTableTitleLabels = document.querySelectorAll(".Table__Title");
   let standingsTableCaptionLabels = document.querySelectorAll(".Table__Caption");
   let tables = [];
@@ -123,7 +140,7 @@ function showNascarData() {
 
       }
       createWeeklyBreakdownTable(scoreData, pointsPerWin);
-
+      insertScoringChart(scoreData, pointsPerWin);
     });
   });
   
