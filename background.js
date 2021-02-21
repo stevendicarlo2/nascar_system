@@ -1,19 +1,19 @@
 
 var tabID;
 
-function getAdjustedScores(adjustments, scoreData) {
+function getAdjustedScores(adjustments, weeklyBreakdownInfo) {
   for (let week in adjustments) {
     for (let team in adjustments[week]) {
       let value = parseFloat(adjustments[week][team]);
-      if (week in scoreData) {
-        if (team in scoreData[week]) {
-          scoreData[week][team].score += value;
+      if (week in weeklyBreakdownInfo) {
+        if (team in weeklyBreakdownInfo[week]) {
+          weeklyBreakdownInfo[week][team].score += value;
         }
       }
     }
   }
-  scoreData["storedTime"] = new Date().getTime();
-  return scoreData;
+  weeklyBreakdownInfo["storedTime"] = new Date().getTime();
+  return weeklyBreakdownInfo;
 }
 
 function processScores(rawData) {
@@ -69,19 +69,19 @@ function processScores(rawData) {
 }
 
 function loadScores(year, override) {
-  chrome.cookies.get({"url": "https://fantasy.espn.com", "name": "kona_v3_teamcontrol_ffl"}, function(cookie) {
+  chrome.cookies.get({"url": "https://fantasy.espn.com", "name": "kona_v3_environment_season_ffl"}, function(cookie) {
     let cookieInfo = JSON.parse(cookie.value);
     let seasonId = (year) ? year : (cookieInfo["seasonId"] || 2020);
-    console.log("seasonId: " + cookieInfo["seasonId"]);
+    console.log("seasonId: " + seasonId);
     console.log("cookieInfo:");
     console.log(cookieInfo);
     let leagueId = cookieInfo["leagueId"];
     
     console.log("in loadScores");
-    chrome.storage.local.get(["scoreData"+seasonId.toString(), "adjustments"], function(result) {
+    chrome.storage.local.get(["weeklyBreakdownInfo"+seasonId.toString(), "adjustments"], function(result) {
       let adjustments = result.adjustments || {};
       adjustments = adjustments[seasonId.toString()] || {};
-      let scoreData = result["scoreData"+seasonId.toString()];
+      let scoreData = result["weeklyBreakdownInfo"+seasonId.toString()];
 
       let shouldReloadData = !scoreData;
       let currTime = new Date().getTime();
@@ -129,10 +129,10 @@ chrome.runtime.onMessage.addListener(
       chrome.storage.local.get(["adjustments"], function(result) {
         let adjustments = result.adjustments || {};
         adjustments = adjustments[request.year] || {};
-        let adjustedScores = getAdjustedScores(adjustments, request.scores);
+        let adjustedScores = getAdjustedScores(adjustments, request.weeklyBreakdownInfo);
         let scoreData = processScores(adjustedScores);
         var info = {};
-        info["scoreData" + request.year.toString()] = adjustedScores;
+        info["weeklyBreakdownInfo" + request.year.toString()] = adjustedScores;
         chrome.storage.local.set(info, function() {
           chrome.storage.local.set({"scoreData": scoreData}, function() {
             console.log('scoreData has been set from scraping page:');

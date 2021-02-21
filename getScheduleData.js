@@ -14,7 +14,7 @@ async function getData() {
     weeks = document.getElementsByClassName("matchup--table");
   }
   console.log("got weeks, length" + weeks.length);
-  var scoreData = {}
+  var weeklyBreakdownInfo = {}
   for (var i=0; i<weeks.length; i++) {
     var week = weeks[i];
     var weekName = week.getElementsByClassName("table-caption dib")[0].innerHTML;
@@ -135,14 +135,14 @@ async function getData() {
     }
     console.log(weekData);
     if (includeWeek) {
-      scoreData[i] = weekData;
+      weeklyBreakdownInfo[i] = weekData;
     }
   }
-  console.log(scoreData);
+  console.log(weeklyBreakdownInfo);
   
   console.log("sending message");
   chrome.runtime.sendMessage({
-    scores: scoreData,
+    weeklyBreakdownInfo: weeklyBreakdownInfo,
     action: "processScores",
     year: seasonId
   });

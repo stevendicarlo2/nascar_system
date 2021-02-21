@@ -37,7 +37,7 @@ chrome.storage.local.get(null, function(storageResults) {
   }
   console.log(storageResults);
   for (let resultName in storageResults) {
-    if (resultName.includes("scoreData") && resultName !== "scoreData") {
+    if (resultName.includes("weeklyBreakdownInfo")) {
       let year = resultName.substring(resultName.length-4, resultName.length);
       if (!(year in adjustments)) {
         adjustments[year] = {}
@@ -85,11 +85,11 @@ document.getElementById("yearSelector").addEventListener("change", function(e) {
   defaultOption2.setAttribute("disabled", "");
   teamSelector.appendChild(defaultOption2);
   
-  chrome.storage.local.get(['scoreData' + year], function(result) {
-    let scoreData = result['scoreData' + year] || {};
-    console.log(scoreData);
+  chrome.storage.local.get(['weeklyBreakdownInfo' + year], function(result) {
+    let weeklyBreakdownInfo = result['weeklyBreakdownInfo' + year] || {};
+    console.log(weeklyBreakdownInfo);
     let includedTeams = [];
-    for (let week in scoreData) {
+    for (let week in weeklyBreakdownInfo) {
       if (week === "storedTime") {
         continue;
       }
@@ -97,7 +97,7 @@ document.getElementById("yearSelector").addEventListener("change", function(e) {
       option.setAttribute("value", week);
       option.innerHTML = (parseInt(week) + 1).toString();
       weekSelector.appendChild(option);
-      for (let team in scoreData[week]) {
+      for (let team in weeklyBreakdownInfo[week]) {
         console.log(team);
         console.log(includedTeams);
         if (!includedTeams.includes(team)) {
