@@ -9,7 +9,17 @@ String.prototype.hashCode = function() {
   return hash;
 };
 
-function shouldInvert(hash) {
+class ScoringChart {
+  scoreData;
+  pointsPerWin;
+  chart;
+  
+  constructor(scoreData, pointsPerWin) {
+    this.scoreData = scoreData;
+    this.pointsPerWin = pointsPerWin;
+  }
+
+shouldInvert(hash) {
   let r = (hash & 0x00FF0000) >> 16;
   let g = (hash & 0x0000FF00) >> 8;
   let b = (hash & 0x000000FF) >> 0;
@@ -17,28 +27,28 @@ function shouldInvert(hash) {
   // (the hardcoded value is Annie's because it's ugly)
   return (brightness > 230 || brightness == 143.398);
 }
-
-function invertHex(hex) {
+ 
+invertHex(hex) {
   return (Number(`0x1${hex}`) ^ 0xFFFFFF).toString(16).substr(1).toUpperCase()
 }
 
-function intToRGB(i){
+intToRGB(i) {
   let c = (i & 0x00FFFFFF)
     .toString(16)
     .toUpperCase();
 
   let rgbString = "00000".substring(0, 6 - c.length) + c;
-  if (shouldInvert(i)) {
-    return invertHex(rgbString);
+  if (this.shouldInvert(i)) {
+    return this.invertHex(rgbString);
   }
   else {
     return rgbString;
   }
 }
 
-function insertScoringChart(scoreData, pointsPerWin) {
+insertScoringChart() {
   console.log("in insertScoringChart");
-  $(document).ready(function () {
+  $(document).ready(() => {
     let shadowRoot = document.querySelector(".shadowRoot");
     let existingChartRoot = shadowRoot.querySelector("#chartRoot");
     
@@ -57,7 +67,7 @@ function insertScoringChart(scoreData, pointsPerWin) {
     chartRoot.appendChild(chartContainer);
 
     var ctx = document.getElementById('myChart').getContext('2d');
-    let chart = new Chart(ctx, {
+    this.chart = new Chart(ctx, {
       type: 'line',
       data: {
         labels: [],
@@ -77,30 +87,30 @@ function insertScoringChart(scoreData, pointsPerWin) {
       }
     })
     
-    let teamFilter = createTeamFilterItem(chart, scoreData, pointsPerWin);
+    let teamFilter = this.createTeamFilterItem();
     if (teamFilter != null) {
       chartRoot.appendChild(teamFilter);
     }
     
-    let customizationToolbar = createCustomizationToolbar(chart, scoreData, pointsPerWin);
+    let customizationToolbar = this.createCustomizationToolbar();
     if (customizationToolbar != null) {
       chartRoot.appendChild(customizationToolbar);
     }
     
-    let weekRange = createWeekRange();
+    let weekRange = this.createWeekRange();
     if (weekRange != null) {
       chartRoot.appendChild(weekRange);
       // The jquery modification in this method has to be done after appending the child into the DOM,
       // it doesn't work when doing it before adding it to the DOM.
-      customizeWeekRange(chart, scoreData, pointsPerWin);
+      this.customizeWeekRange();
     }
 
-    updateScoringChart(chart, scoreData, pointsPerWin);
+    this.updateScoringChart();
   })
 }
 
-function updateScoringChart(chart, scoreData, pointsPerWin) {
-  let filteredScoreData = getFilteredScoreData(scoreData);
+updateScoringChart() {
+  let filteredScoreData = this.getFilteredScoreData();
 
   var chartLabels = []
   for (let week in filteredScoreData.weekly_breakdown) {
@@ -115,7 +125,7 @@ function updateScoringChart(chart, scoreData, pointsPerWin) {
   let includeTeamScore = false;
   let includeOpponentScore = false;
   
-  teamScoreButtons.forEach(function(button) {
+  teamScoreButtons.forEach((button) => {
     let buttonValue = button.getAttribute("value");
     if (buttonValue == "teamScore") {
       includeTeamScore = true;
@@ -127,9 +137,9 @@ function updateScoringChart(chart, scoreData, pointsPerWin) {
   
   var chartDataSets = []
   for (let team in filteredScoreData.totals) {
-    let teamColor = "#" + intToRGB(team.hashCode());
+    let teamColor = "#" + this.intToRGB(team.hashCode());
     
-    selectedPointTypeButtons.forEach(function(selectedPointTypeButton, pointTypeIndex) {
+    selectedPointTypeButtons.forEach((selectedPointTypeButton, pointTypeIndex) => {
       let labelAnnotation;
       if (selectedPointTypeButton.value == "np") {
         labelAnnotation = "NP";
@@ -180,8 +190,8 @@ function updateScoringChart(chart, scoreData, pointsPerWin) {
           opponentData.push(info.oppNP)
         }
         else if (selectedPointTypeButton.value == "anp") {
-          teamData.push(info.nascar_points + info.wins*pointsPerWin)
-          opponentData.push(info.oppNP + (1-info.wins)*pointsPerWin)
+          teamData.push(info.nascar_points + info.wins*this.pointsPerWin)
+          opponentData.push(info.oppNP + (1-info.wins)*this.pointsPerWin)
         }
         else if (selectedPointTypeButton.value == "points") {
           teamData.push(info.score)
@@ -202,12 +212,12 @@ function updateScoringChart(chart, scoreData, pointsPerWin) {
   
   console.log("chartDataSets:", chartDataSets);
   
-  chart.data.labels = chartLabels;
-  chart.data.datasets = chartDataSets;
-  chart.update(0);
+  this.chart.data.labels = chartLabels;
+  this.chart.data.datasets = chartDataSets;
+  this.chart.update(0);
 }
 
-function getFilteredScoreData(scoreData) {
+getFilteredScoreData() {
   let copiedScoreData = {
     totals: {},
     weekly_breakdown: {}
@@ -217,11 +227,11 @@ function getFilteredScoreData(scoreData) {
   let weekMin = $( "#weekRangeRoot .weekRange" ).slider( "values", 0 );
   let weekMax = $( "#weekRangeRoot .weekRange" ).slider( "values", 1 );
   
-  teamOptions.forEach(function(teamOption) {
+  teamOptions.forEach((teamOption) => {
     let teamName = teamOption.getAttribute("value");
     if (teamOption.classList.contains("active")) {
-      copiedScoreData.totals[teamName] = scoreData.totals[teamName];
-      for (let week in scoreData.weekly_breakdown) {
+      copiedScoreData.totals[teamName] = this.scoreData.totals[teamName];
+      for (let week in this.scoreData.weekly_breakdown) {
         let weekValue = parseInt(week) + 1;
         if (weekValue < weekMin || weekValue > weekMax) {
           continue;
@@ -229,7 +239,7 @@ function getFilteredScoreData(scoreData) {
         if (copiedScoreData.weekly_breakdown[week] == undefined) {
           copiedScoreData.weekly_breakdown[week] = {};
         }
-        copiedScoreData.weekly_breakdown[week][teamName] = scoreData.weekly_breakdown[week][teamName];
+        copiedScoreData.weekly_breakdown[week][teamName] = this.scoreData.weekly_breakdown[week][teamName];
       }
     }
   })
@@ -237,7 +247,7 @@ function getFilteredScoreData(scoreData) {
   return copiedScoreData;
 }
 
-function createTeamFilterItem(chart, scoreData, pointsPerWin) {
+createTeamFilterItem() {
   if (document.getElementById("teamFilter")) {
     return null;
   }
@@ -250,9 +260,9 @@ function createTeamFilterItem(chart, scoreData, pointsPerWin) {
   
   // There are 3 roughly equally-sized columns of teams in the selector
   var heightCounter = 0;
-  let teamCount = Object.keys(scoreData.totals).length;
+  let teamCount = Object.keys(this.scoreData.totals).length;
   let maxHeight = Math.ceil(teamCount/3);
-  for (let team in scoreData.totals) {
+  for (let team in this.scoreData.totals) {
     if (heightCounter >= maxHeight) {
       listRoot = document.createElement("ul");
       selectorRoot.appendChild(listRoot);
@@ -264,14 +274,14 @@ function createTeamFilterItem(chart, scoreData, pointsPerWin) {
     teamOption.classList.add("list-group-item");
     teamOption.innerHTML = team;
     teamOption.setAttribute("value", team);
-    teamOption.onclick = function() {
+    teamOption.onclick = () => {
       if (teamOption.classList.contains("active")) {
         teamOption.classList.remove("active");
       }
       else {
         teamOption.classList.add("active");
       }
-      updateScoringChart(chart, scoreData, pointsPerWin);
+      this.updateScoringChart();
     };
 
     heightCounter += 1;
@@ -281,7 +291,7 @@ function createTeamFilterItem(chart, scoreData, pointsPerWin) {
   return selectorRoot
 }
 
-function createCustomizationToolbar(chart, scoreData, pointsPerWin) {
+createCustomizationToolbar() {
   if (document.getElementById("toolbarRoot")) {
     return null;
   }
@@ -291,16 +301,16 @@ function createCustomizationToolbar(chart, scoreData, pointsPerWin) {
   toolbarRoot.classList.add("btn-toolbar");
   toolbarRoot.setAttribute("role", "toolbar");
   
-  let scoreTypeSelector = createScoreTypeSelector(chart, scoreData, pointsPerWin);
+  let scoreTypeSelector = this.createScoreTypeSelector();
   toolbarRoot.appendChild(scoreTypeSelector);
   
-  let opponentScoreSelector = createOpponentScoreSelector(chart, scoreData, pointsPerWin);
+  let opponentScoreSelector = this.createOpponentScoreSelector();
   toolbarRoot.appendChild(opponentScoreSelector);
 
   return toolbarRoot;
 }
 
-function createScoreTypeSelector(chart, scoreData, pointsPerWin) {
+createScoreTypeSelector() {
   let scoreTypeRoot = document.createElement("div");
   scoreTypeRoot.id = "scoreTypeSelector";
 
@@ -327,11 +337,11 @@ function createScoreTypeSelector(chart, scoreData, pointsPerWin) {
   rawPointsScoreButton.setAttribute("value", "points")
   scoreButtons.push(rawPointsScoreButton);
   
-  scoreButtons.forEach(function(scoreButton) {
+  scoreButtons.forEach((scoreButton) => {
     scoreButton.classList.add("btn", "btn-secondary");
     scoreButton.setAttribute("type", "button");
     scoreButton.setAttribute("data-toggle", "button");
-    scoreButton.onclick = function() {
+    scoreButton.onclick = () => {
       if (scoreButton.classList.contains("active")) {
         scoreButton.classList.remove("active");
       }
@@ -339,7 +349,7 @@ function createScoreTypeSelector(chart, scoreData, pointsPerWin) {
         scoreButton.classList.add("active");
       }
       
-      updateScoringChart(chart, scoreData, pointsPerWin);
+      this.updateScoringChart();
     };
     scoreTypeButtonGroup.appendChild(scoreButton);
   })
@@ -347,7 +357,7 @@ function createScoreTypeSelector(chart, scoreData, pointsPerWin) {
   return scoreTypeRoot;
 }
 
-function createOpponentScoreSelector(chart, scoreData, pointsPerWin) {
+createOpponentScoreSelector() {
   let opponentScoreSelector = document.createElement("div");
   opponentScoreSelector.id = "opponentScoreSelector";
 
@@ -369,11 +379,11 @@ function createOpponentScoreSelector(chart, scoreData, pointsPerWin) {
   opponentScoreButton.setAttribute("value", "oppScore");
   buttons.push(opponentScoreButton);
   
-  buttons.forEach(function(button) {
+  buttons.forEach((button) => {
     button.classList.add("btn", "btn-secondary");
     button.setAttribute("type", "button");
     button.setAttribute("data-toggle", "button");
-    button.onclick = function() {
+    button.onclick = () => {
       if (button.classList.contains("active")) {
         button.classList.remove("active");
       }
@@ -381,7 +391,7 @@ function createOpponentScoreSelector(chart, scoreData, pointsPerWin) {
         button.classList.add("active");
       }
       
-      updateScoringChart(chart, scoreData, pointsPerWin);
+      this.updateScoringChart();
     };
     opponentScoreButtonGroup.appendChild(button);
   })
@@ -389,7 +399,7 @@ function createOpponentScoreSelector(chart, scoreData, pointsPerWin) {
   return opponentScoreSelector;
 }
 
-function createWeekRange() {
+createWeekRange() {
   if (document.getElementById("weekRangeRoot")) {
     return null;
   }
@@ -404,13 +414,13 @@ function createWeekRange() {
   return weekRangeRoot;
 }
 
-function customizeWeekRange(chart, scoreData, pointsPerWin) {
+customizeWeekRange() {
   // Subtract one here because one of the keys is for the last stored time
-  let numberOfWeeks = Object.keys(scoreData.weekly_breakdown).length - 1;
+  let numberOfWeeks = Object.keys(this.scoreData.weekly_breakdown).length - 1;
 
   $( "#weekRangeRoot .weekRange" ).slider({
-    change: function(event, ui) { 
-      updateScoringChart(chart, scoreData, pointsPerWin);
+    change: (event, ui) => { 
+      this.updateScoringChart();
     },
     min: 1,
     max: numberOfWeeks,
@@ -428,4 +438,5 @@ function customizeWeekRange(chart, scoreData, pointsPerWin) {
     weekRangeLabelContainer.appendChild(weekRangeLabel);
   }
   weekRangeRoot.appendChild(weekRangeLabelContainer);
+}
 }

@@ -140,7 +140,8 @@ function showNascarData() {
 
       }
       createWeeklyBreakdownTable(scoreData, pointsPerWin);
-      insertScoringChart(scoreData, pointsPerWin);
+      let chart = new ScoringChart(scoreData, pointsPerWin);
+      chart.insertScoringChart();
     });
   });
   
