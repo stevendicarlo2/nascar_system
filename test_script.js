@@ -139,7 +139,9 @@ function showNascarData() {
         }
 
       }
-      createWeeklyBreakdownTable(scoreData, pointsPerWin);
+      
+      let weeklyBreakdownTable = new WeeklyBreakdownTable(scoreData, pointsPerWin);
+      weeklyBreakdownTable.createWeeklyBreakdownTable();
       let chart = new ScoringChart(scoreData, pointsPerWin);
       chart.insertScoringChart();
     });
