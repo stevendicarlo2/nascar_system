@@ -84,7 +84,8 @@ createWeeklyBreakdownTable(useNascarPoints = true) {
         searching: false,
         paging: false,
         data: tableData,
-        columns: columns
+        columns: columns,
+        order: [2, "desc"]
       });
     }
     // $('.dataTables_length').addClass('bs-select');
@@ -94,15 +95,17 @@ createWeeklyBreakdownTable(useNascarPoints = true) {
 
 createColumnDefinitionsForTable() {
   let columns = [
-    { data: "name" },
+    { data: "name", title: "Team" },
     { 
       data: "Total NP", 
+      title: "Total NP", 
       render: (data, type, row, meta) => {
         return this.renderMethodTotalField(row, false, type)
       }
     },
     { 
       data: "Total ANP", 
+      title: "Total ANP", 
       render: (data, type, row, meta) => {
         return this.renderMethodTotalField(row, true, type)
       }
@@ -114,7 +117,8 @@ createColumnDefinitionsForTable() {
       continue;
     }
     let weekColumnObject = {
-      data: "Week " + (week + 1),
+      data: "Week " + (parseInt(week) + 1),
+      title: "Week " + (parseInt(week) + 1),
       render: (data, type, row, meta) => {
         return this.renderMethodWeekField(row, week, type)
       }
@@ -240,7 +244,7 @@ highlightTable() {
 
   let table = $('#weekly_breakdown_table').DataTable();
   table.cells().every( (row, column) => {
-    if (row == 0 || column == 0) {
+    if (column == 0) {
       return;
     }
     

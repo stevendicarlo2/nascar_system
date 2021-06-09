@@ -13,8 +13,27 @@
     "content_scripts": [
       {
         "matches": ["https://fantasy.espn.com/football/league*"],
-        "css": ["style.css", "datatables/myBootstrap.css", "datatables/myDatatables.css", "chart/Chart.min.css", "jquery-ui-1.12.1/jquery-ui.min.css", "jquery-ui-1.12.1/jquery-ui.structure.min.css", "jquery-ui-1.12.1/jquery-ui.theme.min.css"],
-        "js": [ "scoringChart.js", "weeklyBreakdownTable.js", "inject_link.js",  "jquery-3.4.1.min.js", "datatables/mdb.min.js", "datatables/datatables.min.js", "datatables/freeze-table.min.js", "datatables/d3.min.js", "chart/Chart.min.js", "jquery-ui-1.12.1/jquery-ui.min.js"]
+        "css": [
+          "style.css", 
+          "datatables/myBootstrap.css", 
+          "datatables/myDatatables.css", 
+          "chart/Chart.min.css", 
+          "jquery-ui-1.12.1/jquery-ui.min.css", 
+          "jquery-ui-1.12.1/jquery-ui.structure.min.css", 
+          "jquery-ui-1.12.1/jquery-ui.theme.min.css"
+        ],
+        "js": [ 
+          "scoringChart.js", 
+          "weeklyBreakdownTable.js", 
+          "inject_link.js",  
+          "jquery-3.4.1.min.js", 
+          "datatables/mdb.min.js", 
+          "datatables/datatables.min.js", 
+          "datatables/freeze-table.min.js", 
+          "datatables/d3.min.js", 
+          "chart/Chart.min.js", 
+          "jquery-ui-1.12.1/jquery-ui.min.js"
+        ]
       }
     ],
     "manifest_version": 2
