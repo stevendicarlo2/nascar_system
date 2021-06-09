@@ -88,7 +88,7 @@ createWeeklyBreakdownTable(useNascarPoints = true) {
       });
     }
     // $('.dataTables_length').addClass('bs-select');
-    // this.highlightTable();
+    this.highlightTable();
   });
 }
 
@@ -140,7 +140,8 @@ renderMethodTotalField(teamData, useAdjustedPoints, type) {
 }
 
 renderMethodWeekField(teamData, week, type) {
-  return teamData.weeklyInfo[week].nascar_points
+  let weekInfo = teamData.weeklyInfo[week];
+  return weekInfo.nascar_points + weekInfo.wins * this.pointsPerWin;
 }
 
 convertScoreDataToTableStructure() {
@@ -160,83 +161,104 @@ convertScoreDataToTableStructure() {
     teamEntry.weeklyInfo = weeklyInfo;
     allDataRows.push(teamEntry);
   }
-  console.log("abcabc allDataRows: ", allDataRows);
   return allDataRows
 }
 
-highlightTable() {
-  let minScore, minNP, minANP, minWeekScore;
-  let maxScore=0, maxNP=0, maxANP=0, maxWeekScore=0;
+getMinMaxes() {
+  let maxScore=0, maxNP=0,maxTotalNP=0, maxANP=0, maxTotalANP=0;
+  let minScore, minNP, minTotalNP, minANP, minTotalANP;
 
-  d3.selectAll("#weekly_breakdown_table_wrapper td").each((d, i, cells) => {
-    let dataCell = cells[i];
-    if (dataCell.classList.contains("NP_data")) {
-      let nascarPoints = parseFloat(dataCell.textContent);
-      if (minNP === undefined) {
+  let data = $('#weekly_breakdown_table').DataTable().data().each((teamInfo) => {
+    let weeklyInfo = teamInfo.weeklyInfo;
+    let teamTotalNP=0, teamTotalANP=0;
+
+    for (let week in weeklyInfo) {
+      let score = weeklyInfo[week].score;
+      let nascarPoints = weeklyInfo[week].nascar_points;
+      let adjNascarPoints = nascarPoints + this.pointsPerWin * weeklyInfo[week].wins;
+      if (minScore === undefined || minNP === undefined || minTotalNP === undefined) {
+        minScore = score;
         minNP = nascarPoints;
-      } else {
-        minNP = (nascarPoints < minNP) ? nascarPoints : minNP;
+        minANP = adjNascarPoints
       }
+      
+      minScore = (score < minScore) ? score : minScore;
+      minNP = (nascarPoints < minNP) ? nascarPoints : minNP;
+      minANP = (adjNascarPoints < minANP) ? adjNascarPoints : minANP;
+      maxScore = (score > maxScore) ? score : maxScore;
       maxNP = (nascarPoints > maxNP) ? nascarPoints : maxNP;
-    } else if (dataCell.classList.contains("ANP_data")) {
-      let adjNascarPoints = parseFloat(dataCell.textContent);
-      if (minANP === undefined) {
-        minANP = adjNascarPoints;
-      } else {
-        minANP = (adjNascarPoints < minANP) ? adjNascarPoints : minANP;
-      }
       maxANP = (adjNascarPoints > maxANP) ? adjNascarPoints : maxANP;
-    } else if (!dataCell.classList.contains("teamName")) {
-      let nascarPoints = parseFloat(dataCell.getAttribute("data-nascar-points"));
-      let rawPoints = parseFloat(dataCell.getAttribute("data-raw-points"));
-      if (minScore === undefined) {
-        minScore = rawPoints;
-      } else {
-        minScore = (rawPoints < minScore) ? rawPoints : minScore;
-      }
-      maxScore = (rawPoints > maxScore) ? rawPoints : maxScore;
-
-      if (minWeekScore === undefined) {
-        minWeekScore = nascarPoints;
-      } else {
-        minWeekScore = (nascarPoints < minWeekScore) ? nascarPoints : minWeekScore;
-      }
-      maxWeekScore = (nascarPoints > maxWeekScore) ? nascarPoints : maxWeekScore;
+      
+      teamTotalNP += nascarPoints;
+      teamTotalANP += adjNascarPoints;
+    }
+    
+    if (minTotalNP === undefined || minTotalANP === undefined) {
+      minTotalNP = teamTotalNP;
+      minTotalANP = teamTotalANP;
+    }
+    else {
+      minTotalNP = (teamTotalNP < minTotalNP) ? teamTotalNP : minTotalNP;
+      minTotalANP = (teamTotalANP < minTotalANP) ? teamTotalANP : minTotalANP;
+      maxTotalNP = (teamTotalNP > maxTotalNP) ? teamTotalNP : maxTotalNP;
+      maxTotalANP = (teamTotalANP > maxTotalANP) ? teamTotalANP : maxTotalANP;
     }
   });
+    
+  return {
+    minScore: minScore,
+    minNP: minNP,
+    minANP: minANP,
+    minTotalNP: minTotalNP,
+    minTotalANP: minTotalANP,
+    maxScore: maxScore,
+    maxNP: maxNP,
+    maxANP: maxANP,
+    maxTotalNP: maxTotalNP,
+    maxTotalANP: maxTotalANP
+  }
+}
+
+highlightTable() {
+  let minMaxes = this.getMinMaxes();
 
   let badColor = "#fe7575";
   let mediumColor = "#ffff88";
   let goodColor = "#64a764";
-  let colorScale = d3.scaleLinear()
-  .domain([1, (maxWeekScore+1)/2, maxWeekScore])
-  .range([badColor, mediumColor, goodColor]);
-  let colorScaleNP = d3.scaleLinear()
-  .domain([minNP, (minNP + maxNP)/2, maxNP])
-  .range([badColor, mediumColor, goodColor]);
   let colorScaleANP = d3.scaleLinear()
-  .domain([minANP, (minANP+maxANP)/2, maxANP])
+  .domain([minMaxes.minANP, (minMaxes.minANP+minMaxes.maxANP)/2, minMaxes.maxANP])
   .range([badColor, mediumColor, goodColor]);
-  let colorScaleRaw = d3.scaleLinear()
-  .domain([minScore, (minScore+maxScore)/2, maxScore])
+  let colorScaleScore = d3.scaleLinear()
+  .domain([minMaxes.minScore, (minMaxes.minScore+minMaxes.maxScore)/2, minMaxes.maxScore])
+  .range([badColor, mediumColor, goodColor]);
+  let colorScaleTotalNP = d3.scaleLinear()
+  .domain([minMaxes.minTotalNP, (minMaxes.minTotalNP+minMaxes.maxTotalNP)/2, minMaxes.maxTotalNP])
+  .range([badColor, mediumColor, goodColor]);
+  let colorScaleTotalANP = d3.scaleLinear()
+  .domain([minMaxes.minTotalANP, (minMaxes.minTotalANP+minMaxes.maxTotalANP)/2, minMaxes.maxTotalANP])
   .range([badColor, mediumColor, goodColor]);
 
-  d3.selectAll("#weekly_breakdown_table_wrapper td").each((d, i, cells) => {
-    let dataCell = cells[i];
-    let value = parseFloat(dataCell.textContent);
-    let color;
-    if (dataCell.classList.contains("NP_data")) {
-      color = colorScaleNP(value);
-    } else if (dataCell.classList.contains("ANP_data")) {
-      color = colorScaleANP(value);
-    } else if (!dataCell.classList.contains("teamName")) {
-      if ($("#scoreTypeSwitch").is(":checked")) {
-        color = colorScale(value);
-      } else {
-        color = colorScaleRaw(value);
-      }
+  let table = $('#weekly_breakdown_table').DataTable();
+  table.cells().every( (row, column) => {
+    if (row == 0 || column == 0) {
+      return;
     }
-    dataCell.style.backgroundColor = color;
+    
+    let cell = table.cell(row, column);
+    let node = cell.node();
+    let value = parseFloat(node.textContent);
+    let color;
+    if (column == 1) {
+      color = colorScaleTotalNP(value);
+    }
+    else if (column == 2) {
+      color = colorScaleTotalANP(value);
+    }
+    else {
+      color = colorScaleANP(value);
+    }
+    
+    node.style = "background-color:" + color;
   });
 }
 }
