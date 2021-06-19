@@ -4,12 +4,14 @@ if (!window.tableContentsHash) {
 }
 
 class WeeklyBreakdownTable {
+  shadowRoot;
   scoreData;
   pointsPerWin;
   freezeTable;
   tableElement;
   
-  constructor(scoreData, pointsPerWin) {
+  constructor(shadowRoot, scoreData, pointsPerWin) {
+    this.shadowRoot = shadowRoot;
     this.scoreData = scoreData;
     this.pointsPerWin = pointsPerWin;
     console.log("abcabc pointsPerWin:", pointsPerWin);
@@ -20,7 +22,7 @@ recreateWeeklyBreakdownTable(useNascarPoints = true) {
   // this.removeWeeklyBreakdownTable();
   // this.createWeeklyBreakdownTable(useNascarPoints);
   console.log("abcabc recreateWeeklyBreakdownTable");
-  let actualTableBefore = document.querySelector("#weekly_breakdown_table");
+  let actualTableBefore = this.shadowRoot.querySelector("#weekly_breakdown_table");
   console.log("abcabc actualTableBefore: ", actualTableBefore);  
   let beforeInfo = actualTableBefore.innerHTML;
   let actualBeforeInfo = (' ' + beforeInfo).slice(1);
@@ -41,10 +43,7 @@ recreateWeeklyBreakdownTable(useNascarPoints = true) {
       "searching": false,
       "paging": false
     });
-  // }
-  $('.dataTables_length').addClass('bs-select');
-  // console.log("abcabc tableElement: ", this.tableElement);  
-  let actualTable = document.querySelector("#weekly_breakdown_table");
+  let actualTable = this.shadowRoot.querySelector("#weekly_breakdown_table");
   console.log("abcabc actualTable: ", actualTable);  
   let afterInfo = actualTable.innerHTML;
   console.log("abcabc innerHTML is same:",  actualBeforeInfo == afterInfo);
@@ -54,14 +53,13 @@ recreateWeeklyBreakdownTable(useNascarPoints = true) {
 
 createWeeklyBreakdownTable(useNascarPoints = true) {
   console.log("abcabc createWeeklyBreakdownTable");
-  let shadowRoot = document.querySelector(".shadowRoot");
-  let container = shadowRoot.querySelector("#myDataTable");
+  let container = this.shadowRoot.querySelector("#myDataTable");
   
   // There isn't a container yet, so create one
   if (container == undefined) {
     container = document.createElement("div");
     container.id = "myDataTable";
-    shadowRoot.appendChild(container);
+    this.shadowRoot.appendChild(container);
   }
   // There is a container already and it's full, we don't need to do anything
   else if (container.innerHTML != "") {
@@ -77,19 +75,24 @@ createWeeklyBreakdownTable(useNascarPoints = true) {
   $(document).ready(() => {
     let tableData = this.convertScoreDataToTableStructure();
     let columns = this.createColumnDefinitionsForTable();
+    let dataTable;
     if ($.fn.dataTable.isDataTable('#weekly_breakdown_table')) {
-      $('#weekly_breakdown_table').DataTable();
+      dataTable = $('#weekly_breakdown_table').DataTable();
     } else {
-      $('#weekly_breakdown_table').DataTable({
+      dataTable = $('#weekly_breakdown_table').DataTable({
         searching: false,
         paging: false,
         data: tableData,
         columns: columns,
-        order: [2, "desc"]
+        order: [2, "desc"],
+        scrollX: true,
+        fixedColumns: {
+          leftColumns: 3
+        }
       });
     }
-    // $('.dataTables_length').addClass('bs-select');
     this.highlightTable();
+    dataTable.fixedColumns().relayout();
   });
 }
 

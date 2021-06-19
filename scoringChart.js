@@ -10,11 +10,13 @@ String.prototype.hashCode = function() {
 };
 
 class ScoringChart {
+  shadowRoot;
   scoreData;
   pointsPerWin;
   chart;
   
-  constructor(scoreData, pointsPerWin) {
+  constructor(shadowRoot, scoreData, pointsPerWin) {
+    this.shadowRoot = shadowRoot;
     this.scoreData = scoreData;
     this.pointsPerWin = pointsPerWin;
   }
@@ -49,8 +51,7 @@ intToRGB(i) {
 insertScoringChart() {
   console.log("in insertScoringChart");
   $(document).ready(() => {
-    let shadowRoot = document.querySelector(".shadowRoot");
-    let existingChartRoot = shadowRoot.querySelector("#chartRoot");
+    let existingChartRoot = this.shadowRoot.querySelector("#chartRoot");
     
     if (existingChartRoot != undefined) {
       console.log("skipping insertScoringChart");
@@ -59,14 +60,14 @@ insertScoringChart() {
 
     let chartRoot = document.createElement("div");
     chartRoot.id = "chartRoot";
-    shadowRoot.appendChild(chartRoot);
+    this.shadowRoot.appendChild(chartRoot);
   
     let chartContainer = document.createElement("div");
     chartContainer.style = "position: relative; height:40vh; width:80vw";
     chartContainer.innerHTML += `<canvas id="myChart" width="400" height="400"></canvas>`;
     chartRoot.appendChild(chartContainer);
 
-    var ctx = document.getElementById('myChart').getContext('2d');
+    var ctx = this.shadowRoot.querySelector("#myChart").getContext('2d');
     this.chart = new Chart(ctx, {
       type: 'line',
       data: {
@@ -120,8 +121,8 @@ updateScoringChart() {
     chartLabels.push((parseInt(week) + 1).toString())
   }
   
-  let selectedPointTypeButtons = document.querySelector("#scoreTypeSelector").querySelectorAll("button.active");
-  let teamScoreButtons = document.querySelector("#opponentScoreSelector").querySelectorAll("button.active");
+  let selectedPointTypeButtons = this.shadowRoot.querySelector("#scoreTypeSelector").querySelectorAll("button.active");
+  let teamScoreButtons = this.shadowRoot.querySelector("#opponentScoreSelector").querySelectorAll("button.active");
   let includeTeamScore = false;
   let includeOpponentScore = false;
   
@@ -222,7 +223,7 @@ getFilteredScoreData() {
     totals: {},
     weekly_breakdown: {}
   };
-  let teamFilter = document.getElementById("teamFilter");
+  let teamFilter = this.shadowRoot.querySelector("#teamFilter");
   let teamOptions = teamFilter.querySelectorAll("li");
   let weekMin = $( "#weekRangeRoot .weekRange" ).slider( "values", 0 );
   let weekMax = $( "#weekRangeRoot .weekRange" ).slider( "values", 1 );
@@ -248,7 +249,7 @@ getFilteredScoreData() {
 }
 
 createTeamFilterItem() {
-  if (document.getElementById("teamFilter")) {
+  if (this.shadowRoot.querySelector("#teamFilter")) {
     return null;
   }
   let selectorRoot = document.createElement("div");
@@ -292,7 +293,7 @@ createTeamFilterItem() {
 }
 
 createCustomizationToolbar() {
-  if (document.getElementById("toolbarRoot")) {
+  if (this.shadowRoot.querySelector("#toolbarRoot")) {
     return null;
   }
 
@@ -400,7 +401,7 @@ createOpponentScoreSelector() {
 }
 
 createWeekRange() {
-  if (document.getElementById("weekRangeRoot")) {
+  if (this.shadowRoot.querySelector("#weekRangeRoot")) {
     return null;
   }
 
@@ -428,7 +429,7 @@ customizeWeekRange() {
     values: [1, numberOfWeeks]
   });
   
-  let weekRangeRoot = document.getElementById("weekRangeRoot");
+  let weekRangeRoot = this.shadowRoot.querySelector("#weekRangeRoot");
   let weekRangeLabelContainer = document.createElement("div");
   weekRangeLabelContainer.classList.add("weekRangeLabelContainer");
   for (let i = 1; i <= numberOfWeeks; i++) {

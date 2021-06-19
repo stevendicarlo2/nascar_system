@@ -33,8 +33,6 @@ function showNascarData() {
   shadowRoot.classList.add("shadowRoot");
   base.appendChild(shadowRoot);
   shadowRoot.innerHTML = '<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.2/css/all.css">';
-  shadowRoot.innerHTML += '<script type="text/javascript" src="datatables/mdb.min.js"></script>';
-  shadowRoot.innerHTML += '<script type="text/javascript" src="datatables/datatables.min.js"></script>';
   
   let standingsTableTitleLabels = document.querySelectorAll(".Table__Title");
   let standingsTableCaptionLabels = document.querySelectorAll(".Table__Caption");
@@ -140,9 +138,9 @@ function showNascarData() {
 
       }
       
-      let weeklyBreakdownTable = new WeeklyBreakdownTable(scoreData, pointsPerWin);
+      let weeklyBreakdownTable = new WeeklyBreakdownTable(shadowRoot, scoreData, pointsPerWin);
       weeklyBreakdownTable.createWeeklyBreakdownTable();
-      let chart = new ScoringChart(scoreData, pointsPerWin);
+      let chart = new ScoringChart(shadowRoot, scoreData, pointsPerWin);
       chart.insertScoringChart();
     });
   });
