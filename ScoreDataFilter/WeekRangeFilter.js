@@ -14,7 +14,7 @@ class WeekRangeFilter {
 
   notifySubscribers() {
     this.changeSubscribers.forEach((subscriber) => {
-      subscriber.updateScoringChart();
+      subscriber.didUpdateWeekFilter();
     });
   }
 

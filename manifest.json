@@ -25,6 +25,7 @@
           "ScoreDataFilter/TeamFilter.js",
           "ScoreDataFilter/WeekRangeFilter.js",
           "ScoreDataFilter/ScoreTypeFilter.js",
+          "ScoreDataFilter/ScoreDataFilter.js",          
           "scoringChart.js", 
           "weeklyBreakdownTable.js", 
           "inject_link.js",  

@@ -87,32 +87,6 @@ insertScoringChart() {
         }
       }
     })
-    
-    let teamFilter = new TeamFilter(this.shadowRoot, this.scoreData);
-    teamFilter.addChangeSubscriber(this);
-    let teamFilterItem = teamFilter.createTeamFilterItem();
-    if (teamFilterItem != null) {
-      chartRoot.appendChild(teamFilterItem);
-    }
-    
-    let scoreTypeFilter = new ScoreTypeFilter(this.shadowRoot, this.scoreData);
-    scoreTypeFilter.addChangeSubscriber(this);
-    let scoreTypeFilterItem = scoreTypeFilter.createScoreTypeFilter();
-    if (scoreTypeFilterItem != null) {
-      chartRoot.appendChild(scoreTypeFilterItem);
-    }
-    
-    let weekRange = new WeekRangeFilter(this.shadowRoot, this.scoreData);
-    weekRange.addChangeSubscriber(this);
-    let weekRangeItem = weekRange.createWeekRange();
-    if (weekRangeItem != null) {
-      chartRoot.appendChild(weekRangeItem);
-      // The jquery modification in this method has to be done after appending the child into the DOM,
-      // it doesn't work when doing it before adding it to the DOM.
-      weekRange.customizeWeekRange();
-    }
-
-    this.updateScoringChart();
   })
 }
 
@@ -230,7 +204,7 @@ getFilteredScoreData() {
     weekly_breakdown: {}
   };
   let teamFilter = this.shadowRoot.querySelector("#teamFilter");
-  let teamOptions = teamFilter.querySelectorAll("li");
+  let teamOptions = this.shadowRoot.querySelectorAll("li");
   let weekMin = $( "#weekRangeRoot .weekRange" ).slider( "values", 0 );
   let weekMax = $( "#weekRangeRoot .weekRange" ).slider( "values", 1 );
   
@@ -252,5 +226,9 @@ getFilteredScoreData() {
   })
   console.log("copiedScoreData: ", copiedScoreData);
   return copiedScoreData;
+}
+
+didUpdateScoreDataFilter() {
+  this.updateScoringChart();
 }
 }

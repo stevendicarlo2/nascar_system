@@ -142,6 +142,12 @@ function showNascarData() {
       weeklyBreakdownTable.createWeeklyBreakdownTable();
       let chart = new ScoringChart(shadowRoot, scoreData, pointsPerWin);
       chart.insertScoringChart();
+      
+      let scoreDataFilter = new ScoreDataFilter(shadowRoot, scoreData);
+      scoreDataFilter.addChangeSubscriber(chart);
+      scoreDataFilter.createScoreDataFilterItem();
+      
+      chart.updateScoringChart();
     });
   });
   

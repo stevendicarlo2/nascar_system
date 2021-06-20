@@ -14,7 +14,7 @@ class TeamFilter {
   
   notifySubscribers() {
     this.changeSubscribers.forEach((subscriber) => {
-      subscriber.updateScoringChart();
+      subscriber.didUpdateTeamFilter();
     });
   }
 

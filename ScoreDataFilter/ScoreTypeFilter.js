@@ -14,7 +14,7 @@ class ScoreTypeFilter {
 
   notifySubscribers() {
     this.changeSubscribers.forEach((subscriber) => {
-      subscriber.updateScoringChart();
+      subscriber.didUpdateScoreTypeFilter();
     });
   }
   
