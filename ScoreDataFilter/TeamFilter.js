@@ -17,6 +17,19 @@ class TeamFilter {
       subscriber.didUpdateTeamFilter();
     });
   }
+  
+  getFilterInfo() {
+    let filter = this.root.querySelector("#teamFilter");
+    let teamOptions = Array.from(filter.querySelectorAll("li"));
+    let teamNames = teamOptions.filter((teamOption) => {
+      return teamOption.classList.contains("active");
+    })
+    .map((teamOption) => {
+      return teamOption.getAttribute("value");
+    });
+
+    return teamNames;
+  }
 
   createTeamFilterItem() {
     if (this.root.querySelector("#teamFilter")) {

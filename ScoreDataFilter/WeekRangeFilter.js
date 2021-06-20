@@ -17,6 +17,13 @@ class WeekRangeFilter {
       subscriber.didUpdateWeekFilter();
     });
   }
+  
+  getFilterInfo() {
+    let weekMin = $( "#weekRangeRoot .weekRange" ).slider( "values", 0 );
+    let weekMax = $( "#weekRangeRoot .weekRange" ).slider( "values", 1 );
+    
+    return {weekMin: weekMin, weekMax: weekMax};
+  }
 
   createWeekRange() {
     if (this.root.querySelector("#weekRangeRoot")) {

@@ -1,3 +1,9 @@
+const PointsTypeEnum = Object.freeze({
+  np: "np", 
+  anp: "anp", 
+  points: "points"
+})
+
 class ScoreTypeFilter {
   root;
   scoreData;
@@ -16,6 +22,33 @@ class ScoreTypeFilter {
     this.changeSubscribers.forEach((subscriber) => {
       subscriber.didUpdateScoreTypeFilter();
     });
+  }
+  
+  getFilterInfo() {
+    let selectedPointTypeButtons = this.root.querySelector("#scoreTypeSelector").querySelectorAll("button.active");
+    let teamScoreButtons = this.root.querySelector("#opponentScoreSelector").querySelectorAll("button.active");
+    let includeTeamScore = false;
+    let includeOpponentScore = false;
+    
+    teamScoreButtons.forEach((button) => {
+      let buttonValue = button.getAttribute("value");
+      if (buttonValue == "teamScore") {
+        includeTeamScore = true;
+      }
+      else if (buttonValue == "oppScore") {
+        includeOpponentScore = true;
+      }
+    })
+    
+    let selectedPointTypes = Array.from(selectedPointTypeButtons).map((button) => {
+      return button.value;
+    });
+    
+    return {
+      selectedPointTypes: selectedPointTypes,
+      includeTeamScore: includeTeamScore,
+      includeOpponentScore: includeOpponentScore
+    };
   }
   
   createScoreTypeFilter() {
@@ -50,18 +83,18 @@ class ScoreTypeFilter {
 
     let npScoreButton = document.createElement("button");
     npScoreButton.innerHTML = "NP";
-    npScoreButton.setAttribute("value", "np")
+    npScoreButton.setAttribute("value", PointsTypeEnum.np)
     npScoreButton.classList.add("active");
     scoreButtons.push(npScoreButton);
     
     let anpScoreButton = document.createElement("button");
     anpScoreButton.innerHTML = "ANP";
-    anpScoreButton.setAttribute("value", "anp")
+    anpScoreButton.setAttribute("value", PointsTypeEnum.anp)
     scoreButtons.push(anpScoreButton);
     
     let rawPointsScoreButton = document.createElement("button");
     rawPointsScoreButton.innerHTML = "Raw Points";
-    rawPointsScoreButton.setAttribute("value", "points")
+    rawPointsScoreButton.setAttribute("value", PointsTypeEnum.points)
     scoreButtons.push(rawPointsScoreButton);
     
     scoreButtons.forEach((scoreButton) => {

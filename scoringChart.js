@@ -90,8 +90,8 @@ insertScoringChart() {
   })
 }
 
-updateScoringChart() {
-  let filteredScoreData = this.getFilteredScoreData();
+updateScoringChart(filterInfo) {
+  let filteredScoreData = this.getFilteredScoreData(filterInfo);
 
   var chartLabels = []
   for (let week in filteredScoreData.weekly_breakdown) {
@@ -101,34 +101,19 @@ updateScoringChart() {
     chartLabels.push((parseInt(week) + 1).toString())
   }
   
-  let selectedPointTypeButtons = this.shadowRoot.querySelector("#scoreTypeSelector").querySelectorAll("button.active");
-  let teamScoreButtons = this.shadowRoot.querySelector("#opponentScoreSelector").querySelectorAll("button.active");
-  let includeTeamScore = false;
-  let includeOpponentScore = false;
-  
-  teamScoreButtons.forEach((button) => {
-    let buttonValue = button.getAttribute("value");
-    if (buttonValue == "teamScore") {
-      includeTeamScore = true;
-    }
-    else if (buttonValue == "oppScore") {
-      includeOpponentScore = true;
-    }
-  })
-  
   var chartDataSets = []
   for (let team in filteredScoreData.totals) {
     let teamColor = "#" + this.intToRGB(team.hashCode());
     
-    selectedPointTypeButtons.forEach((selectedPointTypeButton, pointTypeIndex) => {
+    filterInfo.scoreTypeFilterInfo.selectedPointTypes.forEach((selectedPointType, pointTypeIndex) => {
       let labelAnnotation;
-      if (selectedPointTypeButton.value == "np") {
+      if (selectedPointType === PointsTypeEnum.np) {
         labelAnnotation = "NP";
       }
-      else if (selectedPointTypeButton.value == "anp") {
+      else if (selectedPointType === PointsTypeEnum.anp) {
         labelAnnotation = "ANP";
       }
-      else if (selectedPointTypeButton.value == "points") {
+      else if (selectedPointType === PointsTypeEnum.points) {
         labelAnnotation = "POINTS";
       }
       
@@ -166,15 +151,15 @@ updateScoringChart() {
           continue;
         }
         let info = filteredScoreData.weekly_breakdown[week][team];
-        if (selectedPointTypeButton.value == "np") {
+        if (selectedPointType === PointsTypeEnum.np) {
           teamData.push(info.nascar_points)
           opponentData.push(info.oppNP)
         }
-        else if (selectedPointTypeButton.value == "anp") {
+        else if (selectedPointType === PointsTypeEnum.anp) {
           teamData.push(info.nascar_points + info.wins*this.pointsPerWin)
           opponentData.push(info.oppNP + (1-info.wins)*this.pointsPerWin)
         }
-        else if (selectedPointTypeButton.value == "points") {
+        else if (selectedPointType === PointsTypeEnum.points) {
           teamData.push(info.score)
           opponentData.push(info.oppScore)
         }
@@ -182,10 +167,10 @@ updateScoringChart() {
       dataSet.data = teamData
       opponentDataSet.data = opponentData
       
-      if (includeTeamScore) {
+      if (filterInfo.scoreTypeFilterInfo.includeTeamScore) {
         chartDataSets.push(dataSet)
       }
-      if (includeOpponentScore) {
+      if (filterInfo.scoreTypeFilterInfo.includeOpponentScore) {
         chartDataSets.push(opponentDataSet)
       }
     })
@@ -198,37 +183,34 @@ updateScoringChart() {
   this.chart.update(0);
 }
 
-getFilteredScoreData() {
+getFilteredScoreData(filterInfo) {
   let copiedScoreData = {
     totals: {},
     weekly_breakdown: {}
   };
-  let teamFilter = this.shadowRoot.querySelector("#teamFilter");
-  let teamOptions = this.shadowRoot.querySelectorAll("li");
-  let weekMin = $( "#weekRangeRoot .weekRange" ).slider( "values", 0 );
-  let weekMax = $( "#weekRangeRoot .weekRange" ).slider( "values", 1 );
   
-  teamOptions.forEach((teamOption) => {
-    let teamName = teamOption.getAttribute("value");
-    if (teamOption.classList.contains("active")) {
-      copiedScoreData.totals[teamName] = this.scoreData.totals[teamName];
-      for (let week in this.scoreData.weekly_breakdown) {
-        let weekValue = parseInt(week) + 1;
-        if (weekValue < weekMin || weekValue > weekMax) {
-          continue;
-        }
-        if (copiedScoreData.weekly_breakdown[week] == undefined) {
-          copiedScoreData.weekly_breakdown[week] = {};
-        }
-        copiedScoreData.weekly_breakdown[week][teamName] = this.scoreData.weekly_breakdown[week][teamName];
+  let teamOptions = filterInfo.teamFilterInfo;
+  let weekMin = filterInfo.weekFilterInfo.weekMin;
+  let weekMax = filterInfo.weekFilterInfo.weekMax;
+  
+  teamOptions.forEach((teamName) => {
+    copiedScoreData.totals[teamName] = this.scoreData.totals[teamName];
+    for (let week in this.scoreData.weekly_breakdown) {
+      let weekValue = parseInt(week) + 1;
+      if (weekValue < weekMin || weekValue > weekMax) {
+        continue;
       }
+      if (copiedScoreData.weekly_breakdown[week] == undefined) {
+        copiedScoreData.weekly_breakdown[week] = {};
+      }
+      copiedScoreData.weekly_breakdown[week][teamName] = this.scoreData.weekly_breakdown[week][teamName];
     }
   })
   console.log("copiedScoreData: ", copiedScoreData);
   return copiedScoreData;
 }
 
-didUpdateScoreDataFilter() {
-  this.updateScoringChart();
+didUpdateScoreDataFilter(filterInfo) {
+  this.updateScoringChart(filterInfo);
 }
 }
