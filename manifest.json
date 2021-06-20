@@ -22,6 +22,9 @@
           "jquery-ui-1.12.1/jquery-ui.theme.min.css"
         ],
         "js": [ 
+          "ScoreDataFilter/TeamFilter.js",
+          "ScoreDataFilter/WeekRangeFilter.js",
+          "ScoreDataFilter/ScoreTypeFilter.js",
           "scoringChart.js", 
           "weeklyBreakdownTable.js", 
           "inject_link.js",  

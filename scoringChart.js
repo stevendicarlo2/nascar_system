@@ -88,22 +88,28 @@ insertScoringChart() {
       }
     })
     
-    let teamFilter = this.createTeamFilterItem();
-    if (teamFilter != null) {
-      chartRoot.appendChild(teamFilter);
+    let teamFilter = new TeamFilter(this.shadowRoot, this.scoreData);
+    teamFilter.addChangeSubscriber(this);
+    let teamFilterItem = teamFilter.createTeamFilterItem();
+    if (teamFilterItem != null) {
+      chartRoot.appendChild(teamFilterItem);
     }
     
-    let customizationToolbar = this.createCustomizationToolbar();
-    if (customizationToolbar != null) {
-      chartRoot.appendChild(customizationToolbar);
+    let scoreTypeFilter = new ScoreTypeFilter(this.shadowRoot, this.scoreData);
+    scoreTypeFilter.addChangeSubscriber(this);
+    let scoreTypeFilterItem = scoreTypeFilter.createScoreTypeFilter();
+    if (scoreTypeFilterItem != null) {
+      chartRoot.appendChild(scoreTypeFilterItem);
     }
     
-    let weekRange = this.createWeekRange();
-    if (weekRange != null) {
-      chartRoot.appendChild(weekRange);
+    let weekRange = new WeekRangeFilter(this.shadowRoot, this.scoreData);
+    weekRange.addChangeSubscriber(this);
+    let weekRangeItem = weekRange.createWeekRange();
+    if (weekRangeItem != null) {
+      chartRoot.appendChild(weekRangeItem);
       // The jquery modification in this method has to be done after appending the child into the DOM,
       // it doesn't work when doing it before adding it to the DOM.
-      this.customizeWeekRange();
+      weekRange.customizeWeekRange();
     }
 
     this.updateScoringChart();
@@ -246,198 +252,5 @@ getFilteredScoreData() {
   })
   console.log("copiedScoreData: ", copiedScoreData);
   return copiedScoreData;
-}
-
-createTeamFilterItem() {
-  if (this.shadowRoot.querySelector("#teamFilter")) {
-    return null;
-  }
-  let selectorRoot = document.createElement("div");
-  selectorRoot.id = "teamFilter";
-  
-  var listRoot = document.createElement("ul");
-  selectorRoot.appendChild(listRoot);
-  listRoot.classList.add("list-group", "team-filter-group");
-  
-  // There are 3 roughly equally-sized columns of teams in the selector
-  var heightCounter = 0;
-  let teamCount = Object.keys(this.scoreData.totals).length;
-  let maxHeight = Math.ceil(teamCount/3);
-  for (let team in this.scoreData.totals) {
-    if (heightCounter >= maxHeight) {
-      listRoot = document.createElement("ul");
-      selectorRoot.appendChild(listRoot);
-      listRoot.classList.add("list-group", "team-filter-group");
-      heightCounter = 0;
-    }
-    
-    let teamOption = document.createElement("li");
-    teamOption.classList.add("list-group-item");
-    teamOption.innerHTML = team;
-    teamOption.setAttribute("value", team);
-    teamOption.onclick = () => {
-      if (teamOption.classList.contains("active")) {
-        teamOption.classList.remove("active");
-      }
-      else {
-        teamOption.classList.add("active");
-      }
-      this.updateScoringChart();
-    };
-
-    heightCounter += 1;
-    listRoot.appendChild(teamOption);
-  }
-  
-  return selectorRoot
-}
-
-createCustomizationToolbar() {
-  if (this.shadowRoot.querySelector("#toolbarRoot")) {
-    return null;
-  }
-
-  let toolbarRoot = document.createElement("div");
-  toolbarRoot.id = "toolbarRoot";
-  toolbarRoot.classList.add("btn-toolbar");
-  toolbarRoot.setAttribute("role", "toolbar");
-  
-  let scoreTypeSelector = this.createScoreTypeSelector();
-  toolbarRoot.appendChild(scoreTypeSelector);
-  
-  let opponentScoreSelector = this.createOpponentScoreSelector();
-  toolbarRoot.appendChild(opponentScoreSelector);
-
-  return toolbarRoot;
-}
-
-createScoreTypeSelector() {
-  let scoreTypeRoot = document.createElement("div");
-  scoreTypeRoot.id = "scoreTypeSelector";
-
-  let scoreTypeButtonGroup = document.createElement("div");
-  scoreTypeButtonGroup.classList.add("btn-group");
-  scoreTypeButtonGroup.setAttribute("role", "group");
-  scoreTypeRoot.appendChild(scoreTypeButtonGroup);
-  
-  var scoreButtons = [];
-
-  let npScoreButton = document.createElement("button");
-  npScoreButton.innerHTML = "NP";
-  npScoreButton.setAttribute("value", "np")
-  npScoreButton.classList.add("active");
-  scoreButtons.push(npScoreButton);
-  
-  let anpScoreButton = document.createElement("button");
-  anpScoreButton.innerHTML = "ANP";
-  anpScoreButton.setAttribute("value", "anp")
-  scoreButtons.push(anpScoreButton);
-  
-  let rawPointsScoreButton = document.createElement("button");
-  rawPointsScoreButton.innerHTML = "Raw Points";
-  rawPointsScoreButton.setAttribute("value", "points")
-  scoreButtons.push(rawPointsScoreButton);
-  
-  scoreButtons.forEach((scoreButton) => {
-    scoreButton.classList.add("btn", "btn-secondary");
-    scoreButton.setAttribute("type", "button");
-    scoreButton.setAttribute("data-toggle", "button");
-    scoreButton.onclick = () => {
-      if (scoreButton.classList.contains("active")) {
-        scoreButton.classList.remove("active");
-      }
-      else {
-        scoreButton.classList.add("active");
-      }
-      
-      this.updateScoringChart();
-    };
-    scoreTypeButtonGroup.appendChild(scoreButton);
-  })
-
-  return scoreTypeRoot;
-}
-
-createOpponentScoreSelector() {
-  let opponentScoreSelector = document.createElement("div");
-  opponentScoreSelector.id = "opponentScoreSelector";
-
-  let opponentScoreButtonGroup = document.createElement("div");
-  opponentScoreButtonGroup.classList.add("btn-group");
-  opponentScoreButtonGroup.setAttribute("role", "group");
-  opponentScoreSelector.appendChild(opponentScoreButtonGroup);
-  
-  let buttons = [];
-
-  let teamScoreButton = document.createElement("button");
-  teamScoreButton.innerHTML = "Show selected team's data";
-  teamScoreButton.classList.add("active");
-  teamScoreButton.setAttribute("value", "teamScore");
-  buttons.push(teamScoreButton);
-
-  let opponentScoreButton = document.createElement("button");
-  opponentScoreButton.innerHTML = "Show opponent data";
-  opponentScoreButton.setAttribute("value", "oppScore");
-  buttons.push(opponentScoreButton);
-  
-  buttons.forEach((button) => {
-    button.classList.add("btn", "btn-secondary");
-    button.setAttribute("type", "button");
-    button.setAttribute("data-toggle", "button");
-    button.onclick = () => {
-      if (button.classList.contains("active")) {
-        button.classList.remove("active");
-      }
-      else {
-        button.classList.add("active");
-      }
-      
-      this.updateScoringChart();
-    };
-    opponentScoreButtonGroup.appendChild(button);
-  })
-
-  return opponentScoreSelector;
-}
-
-createWeekRange() {
-  if (this.shadowRoot.querySelector("#weekRangeRoot")) {
-    return null;
-  }
-
-  let weekRangeRoot = document.createElement("div");
-  weekRangeRoot.id = "weekRangeRoot";
-  
-  let weekRange = document.createElement("div");
-  weekRange.classList.add("weekRange");
-  weekRangeRoot.appendChild(weekRange);
-  
-  return weekRangeRoot;
-}
-
-customizeWeekRange() {
-  // Subtract one here because one of the keys is for the last stored time
-  let numberOfWeeks = Object.keys(this.scoreData.weekly_breakdown).length - 1;
-
-  $( "#weekRangeRoot .weekRange" ).slider({
-    change: (event, ui) => { 
-      this.updateScoringChart();
-    },
-    min: 1,
-    max: numberOfWeeks,
-    range: true,
-    values: [1, numberOfWeeks]
-  });
-  
-  let weekRangeRoot = this.shadowRoot.querySelector("#weekRangeRoot");
-  let weekRangeLabelContainer = document.createElement("div");
-  weekRangeLabelContainer.classList.add("weekRangeLabelContainer");
-  for (let i = 1; i <= numberOfWeeks; i++) {
-    let weekRangeLabel = document.createElement("div");
-    weekRangeLabel.classList.add("weekRangeLabel");
-    weekRangeLabel.innerHTML = i;
-    weekRangeLabelContainer.appendChild(weekRangeLabel);
-  }
-  weekRangeRoot.appendChild(weekRangeLabelContainer);
 }
 }
