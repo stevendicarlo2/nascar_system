@@ -7,48 +7,30 @@ class WeeklyBreakdownTable {
   shadowRoot;
   scoreData;
   pointsPerWin;
-  freezeTable;
+  filterInfo;
   tableElement;
   
   constructor(shadowRoot, scoreData, pointsPerWin) {
     this.shadowRoot = shadowRoot;
     this.scoreData = scoreData;
     this.pointsPerWin = pointsPerWin;
-    console.log("abcabc pointsPerWin:", pointsPerWin);
     this.convertScoreDataToTableStructure();
   }
 
-recreateWeeklyBreakdownTable(useNascarPoints = true) {
-  // this.removeWeeklyBreakdownTable();
-  // this.createWeeklyBreakdownTable(useNascarPoints);
-  console.log("abcabc recreateWeeklyBreakdownTable");
-  let actualTableBefore = this.shadowRoot.querySelector("#weekly_breakdown_table");
-  console.log("abcabc actualTableBefore: ", actualTableBefore);  
-  let beforeInfo = actualTableBefore.innerHTML;
-  let actualBeforeInfo = (' ' + beforeInfo).slice(1);
-  // console.log("abcabc actualBeforeInfo: ", actualBeforeInfo);
+didUpdateScoreDataFilter(filterInfo) {
+  let table = $('#weekly_breakdown_table').DataTable();
 
-  this.fillTableWithData(useNascarPoints);
-  this.highlightTable();
-
-  if ($.fn.dataTable.isDataTable('#weekly_breakdown_table')) {
-    console.log("abcabc is already dataTable");
-    let dataTable = $('#weekly_breakdown_table').DataTable();
-    let order = dataTable.order();
-    console.log("abcabc order: ", order);
-    dataTable.destroy();
-  } 
-
-    $('#weekly_breakdown_table').DataTable({
-      "searching": false,
-      "paging": false
-    });
-  let actualTable = this.shadowRoot.querySelector("#weekly_breakdown_table");
-  console.log("abcabc actualTable: ", actualTable);  
-  let afterInfo = actualTable.innerHTML;
-  console.log("abcabc innerHTML is same:",  actualBeforeInfo == afterInfo);
-
-  // this.freezeTable.update();
+  this.filterInfo = filterInfo;
+  let weekMin = this.filterInfo.weekFilterInfo.weekMin;
+  let weekMax = this.filterInfo.weekFilterInfo.weekMax;
+  let weekRange = [...Array(weekMax-weekMin+1).keys()];
+  // The range has to be adjusted by 3 columns of team/NP/ANP,
+  // minus 1 because weekMin starts at 1 not 0
+  let adjustedRange = weekRange.map(x => x + weekMin + 2);
+  table.columns().visible(false);
+  table.columns([0, 1, 2]).visible(true);
+  table.columns(adjustedRange).visible(true);
+  table.fixedColumns().relayout();
 }
 
 createWeeklyBreakdownTable(useNascarPoints = true) {
@@ -92,6 +74,7 @@ createWeeklyBreakdownTable(useNascarPoints = true) {
       });
     }
     this.highlightTable();
+    // This makes sure the frozen columns at the left get the highlighted colors
     dataTable.fixedColumns().relayout();
   });
 }
@@ -114,8 +97,10 @@ createColumnDefinitionsForTable() {
       }
     }
   ]
+  
+  let filteredScoreData = this.getFilteredScoreData();
 
-  for (let week in this.scoreData.weekly_breakdown) {
+  for (let week in filteredScoreData.weekly_breakdown) {
     if (week === "storedTime") {
       continue;
     }
@@ -153,8 +138,9 @@ renderMethodWeekField(teamData, week, type) {
 
 convertScoreDataToTableStructure() {
   let allDataRows = [];
-  let weekly_breakdown = this.scoreData.weekly_breakdown;
-  for (let team in this.scoreData.totals) {
+  let filteredScoreData = this.getFilteredScoreData();
+  let weekly_breakdown = filteredScoreData.weekly_breakdown;
+  for (let team in filteredScoreData.totals) {
     let teamEntry = {};
     teamEntry.name = team;
     let weeklyInfo = [];
@@ -267,5 +253,38 @@ highlightTable() {
     
     node.style = "background-color:" + color;
   });
+}
+
+getFilteredScoreData() {
+  return this.scoreData;
+  
+  if (this.filterInfo === undefined) {
+    return this.scoreData;
+  }
+  
+  let copiedScoreData = {
+    totals: {},
+    weekly_breakdown: {}
+  };
+  
+  let teamOptions = this.filterInfo.teamFilterInfo;
+  let weekMin = this.filterInfo.weekFilterInfo.weekMin;
+  let weekMax = this.filterInfo.weekFilterInfo.weekMax;
+  
+  teamOptions.forEach((teamName) => {
+    copiedScoreData.totals[teamName] = this.scoreData.totals[teamName];
+    for (let week in this.scoreData.weekly_breakdown) {
+      let weekValue = parseInt(week) + 1;
+      if (weekValue < weekMin || weekValue > weekMax) {
+        continue;
+      }
+      if (copiedScoreData.weekly_breakdown[week] == undefined) {
+        copiedScoreData.weekly_breakdown[week] = {};
+      }
+      copiedScoreData.weekly_breakdown[week][teamName] = this.scoreData.weekly_breakdown[week][teamName];
+    }
+  })
+  console.log("copiedScoreData: ", copiedScoreData);
+  return copiedScoreData;
 }
 }
