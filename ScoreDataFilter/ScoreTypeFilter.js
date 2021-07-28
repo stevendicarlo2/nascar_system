@@ -74,25 +74,36 @@ class ScoreTypeFilter {
     let scoreTypeRoot = document.createElement("div");
     scoreTypeRoot.id = "scoreTypeSelector";
 
-    let scoreTypeButtonGroup = document.createElement("div");
-    scoreTypeButtonGroup.classList.add("btn-group");
-    scoreTypeButtonGroup.setAttribute("role", "group");
-    scoreTypeRoot.appendChild(scoreTypeButtonGroup);
+    let config = {
+      buttons: [
+        {
+          displayName: "NP",
+          value: PointsTypeEnum.np,
+          selected: true
+        },
+        {
+          displayName: "ANP",
+          value: PointsTypeEnum.anp,
+          selected: false
+        },
+        {
+          displayName: "Raw Points",
+          value: PointsTypeEnum.points,
+          selected: false
+        }
+      ],
+      id: "scoreTypeSelector",
+      uniqueSelection: false
+    }
     
-    let scoreButtons = [];
+    let scoreTypeButtonGroup = new ButtonGroup(config);
+    scoreTypeButtonGroup.addChangeSubscriber(this);
+    scoreTypeRoot.appendChild(scoreTypeButtonGroup.htmlItem);
 
-    scoreButtons.push(new ButtonItem("NP", PointsTypeEnum.np))
-    scoreButtons[0].select();
-    scoreButtons.push(new ButtonItem("ANP", PointsTypeEnum.anp))
-    scoreButtons.push(new ButtonItem("Raw Points", PointsTypeEnum.points))
-    scoreButtons.forEach((scoreButton) => {
-      scoreButton.addChangeSubscriber(this);
-      scoreTypeButtonGroup.appendChild(scoreButton.htmlItem);
-    })
     return scoreTypeRoot;
   }
   
-  didSelectButton(value) {
+  didUpdateButtonGroup() {
     this.notifySubscribers();
   }
 
@@ -100,20 +111,27 @@ class ScoreTypeFilter {
     let opponentScoreSelector = document.createElement("div");
     opponentScoreSelector.id = "opponentScoreSelector";
 
-    let opponentScoreButtonGroup = document.createElement("div");
-    opponentScoreButtonGroup.classList.add("btn-group");
-    opponentScoreButtonGroup.setAttribute("role", "group");
-    opponentScoreSelector.appendChild(opponentScoreButtonGroup);
-    
-    let buttons = [];
-    buttons.push(new ButtonItem("Show selected team's data", "teamScore"))
-    buttons[0].select();
-    buttons.push(new ButtonItem("Show opponent data", "oppScore"))
-    buttons.forEach((button) => {
-      button.addChangeSubscriber(this);
-      opponentScoreButtonGroup.appendChild(button.htmlItem);
-    })
+    let config = {
+      buttons: [
+        {
+          displayName: "Show selected team's data",
+          value: "teamScore",
+          selected: true
+        },
+        {
+          displayName: "Show opponent data",
+          value: "oppScore",
+          selected: false
+        }
+      ],
+      id: "opponentScoreSelector",
+      uniqueSelection: false
+    }
 
+    let opponentScoreButtonGroup = new ButtonGroup(config);
+    opponentScoreButtonGroup.addChangeSubscriber(this);
+    opponentScoreSelector.appendChild(opponentScoreButtonGroup.htmlItem);
+    
     return opponentScoreSelector;
   }
 }

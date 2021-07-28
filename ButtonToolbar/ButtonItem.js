@@ -14,9 +14,9 @@ class ButtonItem {
     this.changeSubscribers.push(subscriber);
   }
 
-  notifySubscribers(isSelected) {
+  notifySubscribers() {
     this.changeSubscribers.forEach((subscriber) => {
-      subscriber.didSelectButton(this.value);
+      subscriber.didClickButton(this);
     });
   }
   
