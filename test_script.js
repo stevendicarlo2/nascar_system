@@ -138,8 +138,7 @@ function showNascarData() {
 
       }
       
-      let weeklyBreakdownTable = new WeeklyBreakdownTable(shadowRoot, scoreData, pointsPerWin);
-      weeklyBreakdownTable.createWeeklyBreakdownTable();
+      let weeklyBreakdownTable = new WeeklyBreakdownContainer(shadowRoot, scoreData, pointsPerWin);
       let chart = new ScoringChart(shadowRoot, scoreData, pointsPerWin);
       chart.insertScoringChart();
       

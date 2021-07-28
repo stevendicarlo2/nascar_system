@@ -42,20 +42,11 @@ async didUpdateScoreDataFilter(filterInfo) {
 
 createWeeklyBreakdownTable(useNascarPoints = true) {
   console.log("abcabc createWeeklyBreakdownTable");
-  let container = this.shadowRoot.querySelector("#myDataTable");
-  
-  // There isn't a container yet, so create one
-  if (container == undefined) {
-    container = document.createElement("div");
-    container.id = "myDataTable";
-    this.shadowRoot.appendChild(container);
-  }
-  // There is a container already and it's full, we don't need to do anything
-  else if (container.innerHTML != "") {
-    console.log("skipping createWeeklyBreakdownTable");
-    return;    
-  }
     
+  let container = document.createElement("div");
+  container.id = "myDataTable";
+  this.shadowRoot.appendChild(container);
+
   let table = document.createElement("table");
   table.classList.add("table", "table-bordered", "table-sm");
   table.id = "weekly_breakdown_table";
