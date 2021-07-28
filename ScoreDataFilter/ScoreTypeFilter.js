@@ -7,6 +7,7 @@ const PointsTypeEnum = Object.freeze({
 class ScoreTypeFilter {
   root;
   scoreData;
+  toolbar;
   changeSubscribers = [];
   
   constructor(root, scoreData) {
@@ -25,24 +26,36 @@ class ScoreTypeFilter {
   }
   
   getFilterInfo() {
-    let selectedPointTypeButtons = this.root.querySelector("#scoreTypeSelector").querySelectorAll("button.active");
-    let teamScoreButtons = this.root.querySelector("#opponentScoreSelector").querySelectorAll("button.active");
+    let toolbarInfo = this.toolbar.getButtonToolbarInfo();
+    let selectedPointTypes = [];
     let includeTeamScore = false;
     let includeOpponentScore = false;
     
-    teamScoreButtons.forEach((button) => {
-      let buttonValue = button.getAttribute("value");
-      if (buttonValue == "teamScore") {
-        includeTeamScore = true;
+    toolbarInfo.forEach((groupInfo) => {
+      if (groupInfo.id === "scoreTypeSelector") {
+        groupInfo.buttons.forEach((buttonInfo) => {
+          if (buttonInfo.selected) {
+            selectedPointTypes.push(buttonInfo.value);
+          }
+        })
       }
-      else if (buttonValue == "oppScore") {
-        includeOpponentScore = true;
+      else if (groupInfo.id === "opponentScoreSelector") {
+        groupInfo.buttons.forEach((buttonInfo) => {
+          if (buttonInfo.value === "teamScore") {
+            includeTeamScore = buttonInfo.selected;
+          }
+          else if (buttonInfo.value === "oppScore") {
+            includeOpponentScore = buttonInfo.selected;
+          }
+          else {
+            console.log("Unexpected button in opponentScoreSelector: ", buttonInfo.value);
+          }
+        })
+      }
+      else {
+        console.log("Unexpected button group in toolbar: ", groupInfo.id);
       }
     })
-    
-    let selectedPointTypes = Array.from(selectedPointTypeButtons).map((button) => {
-      return button.value;
-    });
     
     return {
       selectedPointTypes: selectedPointTypes,
@@ -52,29 +65,11 @@ class ScoreTypeFilter {
   }
   
   createScoreTypeFilter() {
-    if (this.root.querySelector("#toolbarRoot")) {
+    if (this.toolbar) {
       return null;
     }
 
-    let toolbarRoot = document.createElement("div");
-    toolbarRoot.id = "toolbarRoot";
-    toolbarRoot.classList.add("btn-toolbar");
-    toolbarRoot.setAttribute("role", "toolbar");
-    
-    let scoreTypeSelector = this.createScoreTypeSelector();
-    toolbarRoot.appendChild(scoreTypeSelector);
-    
-    let opponentScoreSelector = this.createOpponentScoreSelector();
-    toolbarRoot.appendChild(opponentScoreSelector);
-
-    return toolbarRoot;
-  }
-
-  createScoreTypeSelector() {
-    let scoreTypeRoot = document.createElement("div");
-    scoreTypeRoot.id = "scoreTypeSelector";
-
-    let config = {
+    let scoreTypeConfig = {
       buttons: [
         {
           displayName: "NP",
@@ -96,22 +91,7 @@ class ScoreTypeFilter {
       uniqueSelection: false
     }
     
-    let scoreTypeButtonGroup = new ButtonGroup(config);
-    scoreTypeButtonGroup.addChangeSubscriber(this);
-    scoreTypeRoot.appendChild(scoreTypeButtonGroup.htmlItem);
-
-    return scoreTypeRoot;
-  }
-  
-  didUpdateButtonGroup() {
-    this.notifySubscribers();
-  }
-
-  createOpponentScoreSelector() {
-    let opponentScoreSelector = document.createElement("div");
-    opponentScoreSelector.id = "opponentScoreSelector";
-
-    let config = {
+    let opponentScoreConfig = {
       buttons: [
         {
           displayName: "Show selected team's data",
@@ -127,11 +107,13 @@ class ScoreTypeFilter {
       id: "opponentScoreSelector",
       uniqueSelection: false
     }
-
-    let opponentScoreButtonGroup = new ButtonGroup(config);
-    opponentScoreButtonGroup.addChangeSubscriber(this);
-    opponentScoreSelector.appendChild(opponentScoreButtonGroup.htmlItem);
     
-    return opponentScoreSelector;
+    this.toolbar = new ButtonToolbar([scoreTypeConfig, opponentScoreConfig]);
+    this.toolbar.addChangeSubscriber(this);
+    return this.toolbar.htmlItem;
+  }
+  
+  didUpdateButtonToolbar() {
+    this.notifySubscribers();
   }
 }

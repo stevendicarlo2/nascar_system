@@ -23,7 +23,8 @@
         ],
         "js": [ 
           "ButtonToolbar/ButtonItem.js",
-          "ButtonToolbar/ButtonGroup.js",          
+          "ButtonToolbar/ButtonGroup.js",
+          "ButtonToolbar/ButtonToolbar.js",
           "ScoreDataFilter/TeamFilter.js",
           "ScoreDataFilter/WeekRangeFilter.js",
           "ScoreDataFilter/ScoreTypeFilter.js",
