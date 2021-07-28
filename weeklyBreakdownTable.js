@@ -17,7 +17,7 @@ class WeeklyBreakdownTable {
     this.convertScoreDataToTableStructure();
   }
 
-didUpdateScoreDataFilter(filterInfo) {
+async didUpdateScoreDataFilter(filterInfo) {
   let table = $('#weekly_breakdown_table').DataTable();
 
   this.filterInfo = filterInfo;
@@ -27,6 +27,13 @@ didUpdateScoreDataFilter(filterInfo) {
   // The range has to be adjusted by 3 columns of team/NP/ANP,
   // minus 1 because weekMin starts at 1 not 0
   let adjustedRange = weekRange.map(x => x + weekMin + 2);
+  
+  // This is a hack to allow the ScoringChart to update faster.
+  // These `visible` calls take a long time, and this sleep allows the ScoringChart
+  // to update on its thread without this slowing it down. 
+  // The sleep doesn't make this any slower than it already is though.
+  await window.sleep(0);
+  
   table.columns().visible(false);
   table.columns([0, 1, 2]).visible(true);
   table.columns(adjustedRange).visible(true);
