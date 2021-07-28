@@ -79,42 +79,21 @@ class ScoreTypeFilter {
     scoreTypeButtonGroup.setAttribute("role", "group");
     scoreTypeRoot.appendChild(scoreTypeButtonGroup);
     
-    var scoreButtons = [];
+    let scoreButtons = [];
 
-    let npScoreButton = document.createElement("button");
-    npScoreButton.innerHTML = "NP";
-    npScoreButton.setAttribute("value", PointsTypeEnum.np)
-    npScoreButton.classList.add("active");
-    scoreButtons.push(npScoreButton);
-    
-    let anpScoreButton = document.createElement("button");
-    anpScoreButton.innerHTML = "ANP";
-    anpScoreButton.setAttribute("value", PointsTypeEnum.anp)
-    scoreButtons.push(anpScoreButton);
-    
-    let rawPointsScoreButton = document.createElement("button");
-    rawPointsScoreButton.innerHTML = "Raw Points";
-    rawPointsScoreButton.setAttribute("value", PointsTypeEnum.points)
-    scoreButtons.push(rawPointsScoreButton);
-    
+    scoreButtons.push(new ButtonItem("NP", PointsTypeEnum.np))
+    scoreButtons[0].select();
+    scoreButtons.push(new ButtonItem("ANP", PointsTypeEnum.anp))
+    scoreButtons.push(new ButtonItem("Raw Points", PointsTypeEnum.points))
     scoreButtons.forEach((scoreButton) => {
-      scoreButton.classList.add("btn", "btn-secondary");
-      scoreButton.setAttribute("type", "button");
-      scoreButton.setAttribute("data-toggle", "button");
-      scoreButton.onclick = () => {
-        if (scoreButton.classList.contains("active")) {
-          scoreButton.classList.remove("active");
-        }
-        else {
-          scoreButton.classList.add("active");
-        }
-        
-        this.notifySubscribers();
-      };
-      scoreTypeButtonGroup.appendChild(scoreButton);
+      scoreButton.addChangeSubscriber(this);
+      scoreTypeButtonGroup.appendChild(scoreButton.htmlItem);
     })
-
     return scoreTypeRoot;
+  }
+  
+  didSelectButton(value) {
+    this.notifySubscribers();
   }
 
   createOpponentScoreSelector() {
@@ -127,33 +106,12 @@ class ScoreTypeFilter {
     opponentScoreSelector.appendChild(opponentScoreButtonGroup);
     
     let buttons = [];
-
-    let teamScoreButton = document.createElement("button");
-    teamScoreButton.innerHTML = "Show selected team's data";
-    teamScoreButton.classList.add("active");
-    teamScoreButton.setAttribute("value", "teamScore");
-    buttons.push(teamScoreButton);
-
-    let opponentScoreButton = document.createElement("button");
-    opponentScoreButton.innerHTML = "Show opponent data";
-    opponentScoreButton.setAttribute("value", "oppScore");
-    buttons.push(opponentScoreButton);
-    
+    buttons.push(new ButtonItem("Show selected team's data", "teamScore"))
+    buttons[0].select();
+    buttons.push(new ButtonItem("Show opponent data", "oppScore"))
     buttons.forEach((button) => {
-      button.classList.add("btn", "btn-secondary");
-      button.setAttribute("type", "button");
-      button.setAttribute("data-toggle", "button");
-      button.onclick = () => {
-        if (button.classList.contains("active")) {
-          button.classList.remove("active");
-        }
-        else {
-          button.classList.add("active");
-        }
-        
-        this.notifySubscribers();
-      };
-      opponentScoreButtonGroup.appendChild(button);
+      button.addChangeSubscriber(this);
+      opponentScoreButtonGroup.appendChild(button.htmlItem);
     })
 
     return opponentScoreSelector;
