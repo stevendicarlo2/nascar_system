@@ -18,6 +18,7 @@ class ButtonGroup {
 
   constructor(config) {
     this.id = config.id;
+    this.uniqueSelection = config.uniqueSelection;
     this.createItem(config);
   }
   
@@ -48,12 +49,19 @@ class ButtonGroup {
   }
 
   didClickButton(clickedButton) {
-    if (this.uniqueSelection && clickedButton.isSelected()) {
-      this.buttons.forEach((button) => {
-        if (button !== clickedButton) {
-          button.deselect();
-        }
-      })
+    if (this.uniqueSelection) {
+      // If it's now selected, deselect the others
+      if (clickedButton.isSelected()) {
+        this.buttons.forEach((button) => {
+          if (button !== clickedButton) {
+            button.deselect();
+          }
+        })
+      }
+      // It can't be unselected, since one button must always be selected
+      else {
+        clickedButton.select();
+      }
     }
     this.notifySubscribers();
   }
