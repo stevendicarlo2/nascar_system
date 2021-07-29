@@ -2,11 +2,18 @@ class WeeklyBreakdownContainer {
   root;
   table;
   toolbar;
+  // This is used for the actual score filter info. 
+  // Before it's been set, it has no team names and only uses NP
   filterInfo;
+  // This is used for the default table that has all the teams 
+  // and displays NP and ANP
   defaultFilterInfo;
   
   constructor(root, scoreData, pointsPerWin) {
     this.root = root;
+    this.filterInfo = this.createDefaultFilterInfo(scoreData, false, false);
+    this.defaultFilterInfo = this.createDefaultFilterInfo(scoreData, true, true);
+
     let isFirstInstance = this.createItem(scoreData, pointsPerWin);
     // This is a hack because the method gets called twice and 
     // doesn't do anything the second time, so the toolbar isn't set up.
@@ -15,7 +22,6 @@ class WeeklyBreakdownContainer {
       return;
     }
     else {
-      this.defaultFilterInfo = this.createDefaultFilterInfo(scoreData);
       this.table.didUpdateScoreDataFilter(this.defaultFilterInfo);
     }
   }
@@ -34,7 +40,7 @@ class WeeklyBreakdownContainer {
   }
   
   didUpdateWeeklyTableToolbar() {
-    this.refreshWeeklyTableToolbarHTMLItem();
+    this.didUpdateScoreDataFilter(this.filterInfo);
   }
   
   refreshWeeklyTableToolbarHTMLItem() {
@@ -69,8 +75,9 @@ class WeeklyBreakdownContainer {
     return true
   }
   
-  createDefaultFilterInfo(scoreData) {
-    let teamNames = Object.keys(scoreData.totals);
+  createDefaultFilterInfo(scoreData, includeTeams, includeANP) {
+    let teamNames = includeTeams ? Object.keys(scoreData.totals) : [];
+    let scoreTypes = includeANP ? [PointsTypeEnum.np, PointsTypeEnum.anp] : [PointsTypeEnum.np];
     
     let weekMin;
     let weekMax = 0;
@@ -94,7 +101,7 @@ class WeeklyBreakdownContainer {
       scoreTypeFilterInfo: {
         includeOpponentScore: false,
         includeTeamScore: true,
-        selectedPointTypes: [PointsTypeEnum.np, PointsTypeEnum.anp]
+        selectedPointTypes: scoreTypes
       },
       weekFilterInfo: {
         weekMin: weekMin+1,
