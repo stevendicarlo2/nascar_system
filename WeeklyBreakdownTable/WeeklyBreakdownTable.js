@@ -8,6 +8,7 @@ class WeeklyBreakdownTable {
   scoreData;
   pointsPerWin;
   filterInfo;
+  weeklyToolbarInfo;
   tableElement;
   
   constructor(shadowRoot, scoreData, pointsPerWin) {
@@ -24,9 +25,35 @@ async didUpdateScoreDataFilter(filterInfo) {
   let weekMin = this.filterInfo.weekFilterInfo.weekMin;
   let weekMax = this.filterInfo.weekFilterInfo.weekMax;
   let weekRange = [...Array(weekMax-weekMin+1).keys()];
-  // The range has to be adjusted by 3 columns of team/NP/ANP,
+  // The range has to be adjusted by 7 columns of total/summary columns,
   // minus 1 because weekMin starts at 1 not 0
-  let adjustedRange = weekRange.map(x => x + weekMin + 2);
+  let adjustedWeekRange = weekRange.map(x => x + weekMin + 6);
+  
+  let summaryColumns = [0];
+  if (filterInfo.scoreTypeFilterInfo.selectedPointTypes.includes(PointsTypeEnum.np)) {
+    if (filterInfo.scoreTypeFilterInfo.includeTeamScore) {
+      summaryColumns.push(1);
+    }
+    if (filterInfo.scoreTypeFilterInfo.includeOpponentScore) {
+      summaryColumns.push(4);
+    }
+  }
+  if (filterInfo.scoreTypeFilterInfo.selectedPointTypes.includes(PointsTypeEnum.anp)) {
+    if (filterInfo.scoreTypeFilterInfo.includeTeamScore) {
+      summaryColumns.push(2);
+    }
+    if (filterInfo.scoreTypeFilterInfo.includeOpponentScore) {
+      summaryColumns.push(5);
+    }
+  }
+  if (filterInfo.scoreTypeFilterInfo.selectedPointTypes.includes(PointsTypeEnum.points)) {
+    if (filterInfo.scoreTypeFilterInfo.includeTeamScore) {
+      summaryColumns.push(3);
+    }
+    if (filterInfo.scoreTypeFilterInfo.includeOpponentScore) {
+      summaryColumns.push(6);
+    }
+  }
   
   // This is a hack to allow the ScoringChart to update faster.
   // These `visible` calls take a long time, and this sleep allows the ScoringChart
@@ -35,8 +62,8 @@ async didUpdateScoreDataFilter(filterInfo) {
   await window.sleep(0);
   
   table.columns().visible(false);
-  table.columns([0, 1, 2]).visible(true);
-  table.columns(adjustedRange).visible(true);
+  table.columns(summaryColumns).visible(true);
+  table.columns(adjustedWeekRange).visible(true);
   table.fixedColumns().relayout();
 }
 
@@ -52,29 +79,31 @@ createWeeklyBreakdownTable(useNascarPoints = true) {
   table.id = "weekly_breakdown_table";
   container.appendChild(table);
 
-  $(document).ready(() => {
-    let tableData = this.convertScoreDataToTableStructure();
-    let columns = this.createColumnDefinitionsForTable();
-    let dataTable;
-    if ($.fn.dataTable.isDataTable('#weekly_breakdown_table')) {
-      dataTable = $('#weekly_breakdown_table').DataTable();
-    } else {
-      dataTable = $('#weekly_breakdown_table').DataTable({
-        searching: false,
-        paging: false,
-        data: tableData,
-        columns: columns,
-        order: [2, "desc"],
-        scrollX: true,
-        fixedColumns: {
-          leftColumns: 3
-        }
-      });
-    }
-    this.highlightTable();
-    // This makes sure the frozen columns at the left get the highlighted colors
-    dataTable.fixedColumns().relayout();
-  });
+  let tableData = this.convertScoreDataToTableStructure();
+  let columns = this.createColumnDefinitionsForTable();
+  let dataTable;
+  if ($.fn.dataTable.isDataTable('#weekly_breakdown_table')) {
+    dataTable = $('#weekly_breakdown_table').DataTable();
+  } else {
+    dataTable = $('#weekly_breakdown_table').DataTable({
+      searching: false,
+      paging: false,
+      data: tableData,
+      columns: columns,
+      order: [2, "desc"],
+      scrollX: true,
+      fixedColumns: {
+        leftColumns: 7
+      }
+    });
+  }
+  this.highlightTable();
+  // This makes sure the frozen columns at the left get the highlighted colors
+  dataTable.fixedColumns().relayout();
+}
+
+updateWeeklyToolbarInfo(weeklyToolbarInfo) {
+  this.weeklyToolbarInfo = weeklyToolbarInfo;
 }
 
 createColumnDefinitionsForTable() {
@@ -84,16 +113,44 @@ createColumnDefinitionsForTable() {
       data: "Total NP", 
       title: "Total NP", 
       render: (data, type, row, meta) => {
-        return this.renderMethodTotalField(row, false, type)
+        return this.renderMethodTotalField(row, PointsTypeEnum.np, false)
       }
     },
     { 
       data: "Total ANP", 
       title: "Total ANP", 
       render: (data, type, row, meta) => {
-        return this.renderMethodTotalField(row, true, type)
+        return this.renderMethodTotalField(row, PointsTypeEnum.anp, false)
       }
-    }
+    },
+    { 
+      data: "Total Score", 
+      title: "Total Score", 
+      render: (data, type, row, meta) => {
+        return this.renderMethodTotalField(row, PointsTypeEnum.points, false)
+      }
+    },
+    { 
+      data: "Opp NP", 
+      title: "Opp NP", 
+      render: (data, type, row, meta) => {
+        return this.renderMethodTotalField(row, PointsTypeEnum.np, true)
+      }
+    },
+    { 
+      data: "Opp ANP", 
+      title: "Opp ANP", 
+      render: (data, type, row, meta) => {
+        return this.renderMethodTotalField(row, PointsTypeEnum.anp, true)
+      }
+    },
+    { 
+      data: "Opp Score", 
+      title: "Opp Score", 
+      render: (data, type, row, meta) => {
+        return this.renderMethodTotalField(row, PointsTypeEnum.points, true)
+      }
+    },
   ]
   
   let filteredScoreData = this.getFilteredScoreData();
@@ -115,15 +172,33 @@ createColumnDefinitionsForTable() {
   return columns;
 }
 
-renderMethodTotalField(teamData, useAdjustedPoints, type) {
+renderMethodTotalField(teamData, scoreType, useOpponentScore) {
   let total = 0;
   for (let week in teamData.weeklyInfo) {
     let weekData = teamData.weeklyInfo[week];
-    if (useAdjustedPoints) {
-      total += weekData.nascar_points + weekData.wins * this.pointsPerWin;
+    if (scoreType === PointsTypeEnum.np) {
+      if (useOpponentScore) {
+        total += weekData.oppNP;
+      }
+      else {
+        total += weekData.nascar_points;
+      }
     }
-    else {
-      total += weekData.nascar_points;
+    else if (scoreType === PointsTypeEnum.anp) {
+      if (useOpponentScore) {
+        total += weekData.oppNP + (1-weekData.wins) * this.pointsPerWin;
+      }
+      else {
+        total += weekData.nascar_points + weekData.wins * this.pointsPerWin;
+      }
+    }
+    else if (scoreType === PointsTypeEnum.points) {
+      if (useOpponentScore) {
+        total += weekData.oppScore;
+      }
+      else {
+        total += weekData.score;
+      }
     }
   }
   return total;
@@ -134,6 +209,19 @@ renderMethodWeekField(teamData, week, type) {
   return weekInfo.nascar_points + weekInfo.wins * this.pointsPerWin;
 }
 
+// {
+//   name: String
+//   weeklyInfo: [
+//     {
+//       nascar_points: Int
+//       oppNP: Int
+//       oppName: String
+//       oppScore: Float
+//       score: Float
+//       wins: Float
+//     },
+//   ]
+// }
 convertScoreDataToTableStructure() {
   let allDataRows = [];
   let filteredScoreData = this.getFilteredScoreData();
@@ -156,12 +244,12 @@ convertScoreDataToTableStructure() {
 }
 
 getMinMaxes() {
-  let maxScore=0, maxNP=0,maxTotalNP=0, maxANP=0, maxTotalANP=0;
-  let minScore, minNP, minTotalNP, minANP, minTotalANP;
+  let maxScore=0, maxTotalScore=0, maxNP=0, maxTotalNP=0, maxANP=0, maxTotalANP=0;
+  let minScore, minTotalScore, minNP, minTotalNP, minANP, minTotalANP;
 
   let data = $('#weekly_breakdown_table').DataTable().data().each((teamInfo) => {
     let weeklyInfo = teamInfo.weeklyInfo;
-    let teamTotalNP=0, teamTotalANP=0;
+    let teamTotalNP=0, teamTotalANP=0, teamTotalScore=0;
 
     for (let week in weeklyInfo) {
       let score = weeklyInfo[week].score;
@@ -182,17 +270,21 @@ getMinMaxes() {
       
       teamTotalNP += nascarPoints;
       teamTotalANP += adjNascarPoints;
+      teamTotalScore += score;
     }
     
-    if (minTotalNP === undefined || minTotalANP === undefined) {
+    if (minTotalNP === undefined || minTotalANP === undefined || minTotalScore === undefined) {
       minTotalNP = teamTotalNP;
       minTotalANP = teamTotalANP;
+      minTotalScore = teamTotalScore;
     }
     else {
       minTotalNP = (teamTotalNP < minTotalNP) ? teamTotalNP : minTotalNP;
       minTotalANP = (teamTotalANP < minTotalANP) ? teamTotalANP : minTotalANP;
+      minTotalScore = (teamTotalScore < minTotalScore) ? teamTotalScore : minTotalScore;
       maxTotalNP = (teamTotalNP > maxTotalNP) ? teamTotalNP : maxTotalNP;
       maxTotalANP = (teamTotalANP > maxTotalANP) ? teamTotalANP : maxTotalANP;
+      maxTotalScore = (teamTotalScore > maxTotalScore) ? teamTotalScore : maxTotalScore;
     }
   });
     
@@ -200,11 +292,13 @@ getMinMaxes() {
     minScore: minScore,
     minNP: minNP,
     minANP: minANP,
+    minTotalScore: minTotalScore,
     minTotalNP: minTotalNP,
     minTotalANP: minTotalANP,
     maxScore: maxScore,
     maxNP: maxNP,
     maxANP: maxANP,
+    maxTotalScore: maxTotalScore,
     maxTotalNP: maxTotalNP,
     maxTotalANP: maxTotalANP
   }
@@ -221,6 +315,9 @@ highlightTable() {
   .range([badColor, mediumColor, goodColor]);
   let colorScaleScore = d3.scaleLinear()
   .domain([minMaxes.minScore, (minMaxes.minScore+minMaxes.maxScore)/2, minMaxes.maxScore])
+  .range([badColor, mediumColor, goodColor]);
+  let colorScaleTotalScore = d3.scaleLinear()
+  .domain([minMaxes.minTotalScore, (minMaxes.minTotalScore+minMaxes.maxTotalScore)/2, minMaxes.maxTotalScore])
   .range([badColor, mediumColor, goodColor]);
   let colorScaleTotalNP = d3.scaleLinear()
   .domain([minMaxes.minTotalNP, (minMaxes.minTotalNP+minMaxes.maxTotalNP)/2, minMaxes.maxTotalNP])
@@ -244,6 +341,18 @@ highlightTable() {
     }
     else if (column == 2) {
       color = colorScaleTotalANP(value);
+    }
+    else if (column == 3) {
+      color = colorScaleTotalScore(value);
+    }
+    else if (column == 4) {
+      color = colorScaleTotalNP(value);
+    }
+    else if (column == 5) {
+      color = colorScaleTotalANP(value);
+    }
+    else if (column == 6) {
+      color = colorScaleTotalScore(value);
     }
     else {
       color = colorScaleANP(value);
