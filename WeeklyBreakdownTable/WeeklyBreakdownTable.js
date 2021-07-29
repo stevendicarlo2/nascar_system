@@ -12,10 +12,11 @@ class WeeklyBreakdownTable {
   tableElement;
   minMaxes;
   
-  constructor(shadowRoot, scoreData, pointsPerWin) {
+  constructor(shadowRoot, scoreData, pointsPerWin, filterInfo) {
     this.shadowRoot = shadowRoot;
     this.scoreData = scoreData;
     this.pointsPerWin = pointsPerWin;
+    this.filterInfo = filterInfo;
     this.minMaxes = this.getMinMaxes(this.convertScoreDataToTableStructure());
   }
 
@@ -70,14 +71,7 @@ async didUpdateScoreDataFilter(filterInfo) {
   table.rows.add(this.convertScoreDataToTableStructure());
     
   let excludedRows = table.rows((i, data) => {
-    if (filterInfo.teamFilterInfo.includes(data.name)) {
-      console.log("included:", data.name);
-      return false;
-    }
-    else {
-      console.log("excluded:", data.name);
-      return true;
-    }
+    return !filterInfo.teamFilterInfo.includes(data.name);
   });
   
   excludedRows.remove().draw();
@@ -222,8 +216,33 @@ renderMethodTotalField(teamData, scoreType, useOpponentScore) {
 }
 
 renderMethodWeekField(teamData, week, type) {
-  let weekInfo = teamData.weeklyInfo[week];
-  return weekInfo.nascar_points + weekInfo.wins * this.pointsPerWin;
+  let weekData = teamData.weeklyInfo[week];
+  let scoreType = this.filterInfo.selectedInfo.pointType;
+  let useOpponentScore = this.filterInfo.selectedInfo.teamScoreType === "oppScore";
+  if (scoreType === PointsTypeEnum.np) {
+    if (useOpponentScore) {
+      return weekData.oppNP;
+    }
+    else {
+      return weekData.nascar_points;
+    }
+  }
+  else if (scoreType === PointsTypeEnum.anp) {
+    if (useOpponentScore) {
+      return weekData.oppNP + (1-weekData.wins) * this.pointsPerWin;
+    }
+    else {
+      return weekData.nascar_points + weekData.wins * this.pointsPerWin;
+    }
+  }
+  else if (scoreType === PointsTypeEnum.points) {
+    if (useOpponentScore) {
+      return weekData.oppScore;
+    }
+    else {
+      return weekData.score;
+    }
+  }
 }
 
 // {
@@ -326,6 +345,9 @@ highlightTable() {
   let badColor = "#fe7575";
   let mediumColor = "#ffff88";
   let goodColor = "#64a764";
+  let colorScaleNP = d3.scaleLinear()
+  .domain([minMaxes.minNP, (minMaxes.minNP+minMaxes.maxNP)/2, minMaxes.maxNP])
+  .range([badColor, mediumColor, goodColor]);
   let colorScaleANP = d3.scaleLinear()
   .domain([minMaxes.minANP, (minMaxes.minANP+minMaxes.maxANP)/2, minMaxes.maxANP])
   .range([badColor, mediumColor, goodColor]);
@@ -371,7 +393,18 @@ highlightTable() {
       color = colorScaleTotalScore(value);
     }
     else {
-      color = colorScaleANP(value);
+      if (this.filterInfo.selectedInfo.pointType === PointsTypeEnum.np) {
+        color = colorScaleNP(value);
+      }
+      else if (this.filterInfo.selectedInfo.pointType === PointsTypeEnum.anp) {
+        color = colorScaleANP(value);
+      }
+      else if (this.filterInfo.selectedInfo.pointType === PointsTypeEnum.points) {
+        color = colorScaleScore(value);
+      }
+      else {
+        console.log("Unexpected point type when highlighting:", this.filterInfo.selectedInfo.pointType);
+      }
     }
     
     node.style = "background-color:" + color;

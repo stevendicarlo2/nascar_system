@@ -27,6 +27,7 @@ class WeeklyBreakdownContainer {
   }
   
   didUpdateScoreDataFilter(filterInfo) {
+    filterInfo.selectedInfo = this.toolbar.weeklyToolbarInfo.selectedInfo;
     this.filterInfo = filterInfo;
     this.toolbar.updateScoreTypeFilterInfo(filterInfo.scoreTypeFilterInfo);
     this.refreshWeeklyTableToolbarHTMLItem();
@@ -66,7 +67,7 @@ class WeeklyBreakdownContainer {
       return false;    
     }
     
-    this.table = new WeeklyBreakdownTable(container, scoreData, pointsPerWin);
+    this.table = new WeeklyBreakdownTable(container, scoreData, pointsPerWin, this.defaultFilterInfo);
     this.table.createWeeklyBreakdownTable();
 
     this.toolbar = new WeeklyTableToolbar();
@@ -106,6 +107,10 @@ class WeeklyBreakdownContainer {
       weekFilterInfo: {
         weekMin: weekMin+1,
         weekMax: weekMax+1
+      },
+      selectedInfo: {
+        pointType: PointsTypeEnum.anp,
+        teamScoreType: "teamScore"
       }
     }
   }
