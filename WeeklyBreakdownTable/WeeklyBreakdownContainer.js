@@ -12,14 +12,18 @@ class WeeklyBreakdownContainer {
     this.table.didUpdateScoreDataFilter(filterInfo);
     this.toolbar.updateScoreTypeFilterInfo(filterInfo.scoreTypeFilterInfo);
 
+    this.refreshWeeklyTableToolbarHTMLItem();
+  }
+  
+  didUpdateWeeklyTableToolbar() {
+    this.refreshWeeklyTableToolbarHTMLItem();
+  }
+  
+  refreshWeeklyTableToolbarHTMLItem() {
     let existingContainer = this.root.querySelector("#WeeklyBreakdownContainer");
     let existingToolbar = existingContainer.querySelector(".btn-toolbar");
     existingContainer.removeChild(existingToolbar);
     existingContainer.appendChild(this.toolbar.htmlItem);
-  }
-  
-  didUpdateWeeklyTableToolbar() {
-    console.log("abcabc here");
   }
   
   createItem(scoreData, pointsPerWin) {
