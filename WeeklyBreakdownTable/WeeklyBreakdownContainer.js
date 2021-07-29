@@ -1,28 +1,36 @@
 class WeeklyBreakdownContainer {
+  root;
   table;
   toolbar;
   
   constructor(root, scoreData, pointsPerWin) {
-    this.createItem(root, scoreData, pointsPerWin);
+    this.root = root;
+    this.createItem(scoreData, pointsPerWin);
   }
   
   didUpdateScoreDataFilter(filterInfo) {
     this.table.didUpdateScoreDataFilter(filterInfo);
+    this.toolbar.updateScoreTypeFilterInfo(filterInfo.scoreTypeFilterInfo);
+
+    let existingContainer = this.root.querySelector("#WeeklyBreakdownContainer");
+    let existingToolbar = existingContainer.querySelector(".btn-toolbar");
+    existingContainer.removeChild(existingToolbar);
+    existingContainer.appendChild(this.toolbar.htmlItem);
   }
   
   didUpdateWeeklyTableToolbar() {
     console.log("abcabc here");
   }
   
-  createItem(root, scoreData, pointsPerWin) {
+  createItem(scoreData, pointsPerWin) {
     console.log("abcabc createWeeklyBreakdownContainer");
-    let container = root.querySelector("#WeeklyBreakdownContainer");
+    let container = this.root.querySelector("#WeeklyBreakdownContainer");
     
     // There isn't a container yet, so create one
     if (container == undefined) {
       container = document.createElement("div");
       container.id = "WeeklyBreakdownContainer";
-      root.appendChild(container);
+      this.root.appendChild(container);
     }
     // There is a container already and it's full, we don't need to do anything
     else if (container.innerHTML != "") {

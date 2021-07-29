@@ -27,7 +27,13 @@ class WeeklyTableToolbar {
     this.notifySubscribers();
   }
   
-  createItem() {
+  updateScoreTypeFilterInfo(scoreTypeFilterInfo) {
+    this.scoreTypeFilterInfo = scoreTypeFilterInfo;
+    this.createItem();
+  }
+  
+  createItem() {    
+    let configs = [];
     let standingsTypeConfig = {
       buttons: [
         {
@@ -44,8 +50,66 @@ class WeeklyTableToolbar {
       id: "standingsFilterSelector",
       uniqueSelection: true
     }
+    configs.push(standingsTypeConfig);
     
-    this.toolbar = new ButtonToolbar([standingsTypeConfig]);
+    let filterInfo = this.scoreTypeFilterInfo;
+    if (filterInfo && filterInfo.selectedPointTypes.length > 1) {
+      let scoreButtons = filterInfo.selectedPointTypes.map((pointType) => {
+        if (pointType === PointsTypeEnum.np) {
+          return {
+            displayName: "NP",
+            value: PointsTypeEnum.np,
+            selected: true
+          }
+        }
+        else if (pointType === PointsTypeEnum.anp) {
+          return {
+            displayName: "ANP",
+            value: PointsTypeEnum.anp,
+            selected: false
+          }
+        }
+        else if (pointType === PointsTypeEnum.points) {
+          return {
+            displayName: "Raw Points",
+            value: PointsTypeEnum.points,
+            selected: false
+          }
+        }
+        else {
+          console.log("Unexpected point type when making WeeklyTableToolbar:", pointType);
+        }
+      })
+
+      let pointTypeConfig = {
+        buttons: scoreButtons,
+        id: "scoreTypeSelector",
+        uniqueSelection: true
+      }
+      configs.push(pointTypeConfig);
+    }
+    
+    if (filterInfo && filterInfo.includeOpponentScore && filterInfo.includeTeamScore) {
+      let opponentScoreConfig = {
+        buttons: [
+          {
+            displayName: "Show selected team's data",
+            value: "teamScore",
+            selected: true
+          },
+          {
+            displayName: "Show opponent data",
+            value: "oppScore",
+            selected: false
+          }
+        ],
+        id: "opponentScoreSelector",
+        uniqueSelection: true
+      }
+      configs.push(opponentScoreConfig)
+    }
+    
+    this.toolbar = new ButtonToolbar(configs);
     this.toolbar.addChangeSubscriber(this);
     this.htmlItem = this.toolbar.htmlItem;
   }
