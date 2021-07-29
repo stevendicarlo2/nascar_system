@@ -22,6 +22,9 @@ class TeamFilter {
     let filter = this.root.querySelector("#teamFilter");
     let teamOptions = Array.from(filter.querySelectorAll("li"));
     let teamNames = teamOptions.filter((teamOption) => {
+      if (teamOption.getAttribute("value") === "All" || teamOption.getAttribute("value") === "None") {
+        return false;
+      }
       return teamOption.classList.contains("active");
     })
     .map((teamOption) => {
@@ -43,10 +46,11 @@ class TeamFilter {
     listRoot.classList.add("list-group", "team-filter-group");
     
     // There are 3 roughly equally-sized columns of teams in the selector
-    var heightCounter = 0;
-    let teamCount = Object.keys(this.scoreData.totals).length;
+    let heightCounter = 0;
+    let teamList = Object.keys(this.scoreData.totals).concat(["All"]);
+    let teamCount = teamList.length;
     let maxHeight = Math.ceil(teamCount/3);
-    for (let team in this.scoreData.totals) {
+    teamList.forEach((team) => {
       if (heightCounter >= maxHeight) {
         listRoot = document.createElement("ul");
         selectorRoot.appendChild(listRoot);
@@ -59,19 +63,36 @@ class TeamFilter {
       teamOption.innerHTML = team;
       teamOption.setAttribute("value", team);
       teamOption.onclick = () => {
-        if (teamOption.classList.contains("active")) {
-          teamOption.classList.remove("active");
-        }
-        else {
-          teamOption.classList.add("active");
-        }
+        this.handleTeamClick(teamOption);
         this.notifySubscribers();
       };
 
       heightCounter += 1;
       listRoot.appendChild(teamOption);
-    }
+    })
     
     return selectorRoot
+  }
+  
+  handleTeamClick(teamOption) {
+    let filter = this.root.querySelector("#teamFilter");
+    if (teamOption.innerHTML === "All") {
+      teamOption.innerHTML = "None";
+      Array.from(filter.querySelectorAll("li")).forEach((teamNode) => {
+        teamNode.classList.add("active");
+      })
+    }
+    else if (teamOption.innerHTML === "None") {
+      teamOption.innerHTML = "All";
+      Array.from(filter.querySelectorAll("li")).forEach((teamNode) => {
+        teamNode.classList.remove("active");
+      })
+    }
+    else if (teamOption.classList.contains("active")) {
+      teamOption.classList.remove("active");
+    }
+    else {
+      teamOption.classList.add("active");
+    }
   }
 }
