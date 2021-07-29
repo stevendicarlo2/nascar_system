@@ -10,12 +10,13 @@ class WeeklyBreakdownTable {
   filterInfo;
   weeklyToolbarInfo;
   tableElement;
+  minMaxes;
   
   constructor(shadowRoot, scoreData, pointsPerWin) {
     this.shadowRoot = shadowRoot;
     this.scoreData = scoreData;
     this.pointsPerWin = pointsPerWin;
-    this.convertScoreDataToTableStructure();
+    this.minMaxes = this.getMinMaxes(this.convertScoreDataToTableStructure());
   }
 
 async didUpdateScoreDataFilter(filterInfo) {
@@ -64,6 +65,24 @@ async didUpdateScoreDataFilter(filterInfo) {
   table.columns().visible(false);
   table.columns(summaryColumns).visible(true);
   table.columns(adjustedWeekRange).visible(true);
+  
+  table.rows().remove();
+  table.rows.add(this.convertScoreDataToTableStructure());
+    
+  let excludedRows = table.rows((i, data) => {
+    if (filterInfo.teamFilterInfo.includes(data.name)) {
+      console.log("included:", data.name);
+      return false;
+    }
+    else {
+      console.log("excluded:", data.name);
+      return true;
+    }
+  });
+  
+  excludedRows.remove().draw();
+  
+  this.highlightTable();
   table.fixedColumns().relayout();
 }
 
@@ -153,9 +172,7 @@ createColumnDefinitionsForTable() {
     },
   ]
   
-  let filteredScoreData = this.getFilteredScoreData();
-
-  for (let week in filteredScoreData.weekly_breakdown) {
+  for (let week in this.scoreData.weekly_breakdown) {
     if (week === "storedTime") {
       continue;
     }
@@ -224,9 +241,8 @@ renderMethodWeekField(teamData, week, type) {
 // }
 convertScoreDataToTableStructure() {
   let allDataRows = [];
-  let filteredScoreData = this.getFilteredScoreData();
-  let weekly_breakdown = filteredScoreData.weekly_breakdown;
-  for (let team in filteredScoreData.totals) {
+  let weekly_breakdown = this.scoreData.weekly_breakdown;
+  for (let team in this.scoreData.totals) {
     let teamEntry = {};
     teamEntry.name = team;
     let weeklyInfo = [];
@@ -243,11 +259,11 @@ convertScoreDataToTableStructure() {
   return allDataRows
 }
 
-getMinMaxes() {
+getMinMaxes(teamInfos) {
   let maxScore=0, maxTotalScore=0, maxNP=0, maxTotalNP=0, maxANP=0, maxTotalANP=0;
   let minScore, minTotalScore, minNP, minTotalNP, minANP, minTotalANP;
 
-  let data = $('#weekly_breakdown_table').DataTable().data().each((teamInfo) => {
+  teamInfos.forEach((teamInfo) => {
     let weeklyInfo = teamInfo.weeklyInfo;
     let teamTotalNP=0, teamTotalANP=0, teamTotalScore=0;
 
@@ -305,7 +321,7 @@ getMinMaxes() {
 }
 
 highlightTable() {
-  let minMaxes = this.getMinMaxes();
+  let minMaxes = this.minMaxes;
 
   let badColor = "#fe7575";
   let mediumColor = "#ffff88";
@@ -360,38 +376,5 @@ highlightTable() {
     
     node.style = "background-color:" + color;
   });
-}
-
-getFilteredScoreData() {
-  return this.scoreData;
-  
-  if (this.filterInfo === undefined) {
-    return this.scoreData;
-  }
-  
-  let copiedScoreData = {
-    totals: {},
-    weekly_breakdown: {}
-  };
-  
-  let teamOptions = this.filterInfo.teamFilterInfo;
-  let weekMin = this.filterInfo.weekFilterInfo.weekMin;
-  let weekMax = this.filterInfo.weekFilterInfo.weekMax;
-  
-  teamOptions.forEach((teamName) => {
-    copiedScoreData.totals[teamName] = this.scoreData.totals[teamName];
-    for (let week in this.scoreData.weekly_breakdown) {
-      let weekValue = parseInt(week) + 1;
-      if (weekValue < weekMin || weekValue > weekMax) {
-        continue;
-      }
-      if (copiedScoreData.weekly_breakdown[week] == undefined) {
-        copiedScoreData.weekly_breakdown[week] = {};
-      }
-      copiedScoreData.weekly_breakdown[week][teamName] = this.scoreData.weekly_breakdown[week][teamName];
-    }
-  })
-  console.log("copiedScoreData: ", copiedScoreData);
-  return copiedScoreData;
 }
 }
