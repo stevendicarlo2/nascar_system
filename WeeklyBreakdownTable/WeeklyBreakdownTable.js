@@ -210,6 +210,7 @@ renderMethodTotalField(teamData, scoreType, useOpponentScore) {
       else {
         total += weekData.score;
       }
+      total = Math.round(total * 100) / 100;
     }
   }
   return total;
@@ -237,10 +238,10 @@ renderMethodWeekField(teamData, week, type) {
   }
   else if (scoreType === PointsTypeEnum.points) {
     if (useOpponentScore) {
-      return weekData.oppScore;
+      return Math.round(weekData.oppScore * 100) / 100;
     }
     else {
-      return weekData.score;
+      return Math.round(weekData.score * 100) / 100;
     }
   }
 }
