@@ -33,6 +33,7 @@
           "WeeklyBreakdownTable/WeeklyTableToolbar.js", 
           "WeeklyBreakdownTable/WeeklyBreakdownTable.js", 
           "WeeklyBreakdownTable/WeeklyBreakdownContainer.js", 
+          "NascarScoringDisplayer.js",
           "inject_link.js",  
           "jquery-3.4.1.min.js", 
           "datatables/datatables.min.js", 
