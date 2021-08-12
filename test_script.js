@@ -4,10 +4,12 @@ if (!window.sleep) {
   }
 }
 
-let nascarScoringDisplayer;
-
 function showNascarData() {
   console.log("starting showNascarData");
+  if (document.querySelector(".shadowRoot")) {
+    console.log("skipping showNascarData, UI already exists");
+    return;
+  }
   
   let existingStandingsTable = document.querySelector(".final_standings_table");
   let shadowRoot = document.createElement("div");
@@ -15,7 +17,7 @@ function showNascarData() {
   existingStandingsTable.parentNode.insertBefore(shadowRoot, existingStandingsTable);
   shadowRoot.innerHTML = '<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.2/css/all.css">';  
 
-  nascarScoringDisplayer = new NascarScoringDisplayer(shadowRoot);
+  window.nascarScoringDisplayer = new NascarScoringDisplayer(shadowRoot);
 }
 
 chrome.runtime.onMessage.addListener(
@@ -23,7 +25,7 @@ chrome.runtime.onMessage.addListener(
     console.log("got a message");
     console.log(request);
     if (request.action === "refreshDisplay") {
-      nascarScoringDisplayer.refreshDisplay();
+      window.nascarScoringDisplayer.refreshDisplay();
     }
   }
 );
