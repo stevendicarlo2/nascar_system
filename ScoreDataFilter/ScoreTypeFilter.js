@@ -13,6 +13,7 @@ class ScoreTypeFilter {
   constructor(root, scoreData) {
     this.root = root;
     this.scoreData = scoreData;
+    this.createScoreTypeFilter();
   }
   
   addChangeSubscriber(subscriber) {
@@ -65,10 +66,6 @@ class ScoreTypeFilter {
   }
   
   createScoreTypeFilter() {
-    if (this.toolbar) {
-      return null;
-    }
-
     let scoreTypeConfig = {
       buttons: [
         {
@@ -110,7 +107,7 @@ class ScoreTypeFilter {
     
     this.toolbar = new ButtonToolbar([scoreTypeConfig, opponentScoreConfig]);
     this.toolbar.addChangeSubscriber(this);
-    return this.toolbar.htmlItem;
+    this.root.appendChild(this.toolbar.htmlItem);
   }
   
   didUpdateButtonToolbar() {

@@ -9,6 +9,7 @@ class ScoreDataFilter {
   constructor(root, scoreData) {
     this.root = root;
     this.scoreData = scoreData;
+    this.createScoreDataFilterItem();
   }
 
   addChangeSubscriber(subscriber) {
@@ -45,41 +46,17 @@ class ScoreDataFilter {
   }
 
   createScoreDataFilterItem() {
-    $(document).ready(() => {
-      let existingFilter = this.root.querySelector("#scoreDataFilter");
-      
-      if (existingFilter != undefined) {
-        console.log("skipping createScoreDataFilterItem");
-        return
-      }
-
-      let filter = document.createElement("div");
-      filter.id = "scoreDataFilter";
-      this.root.appendChild(filter);
-      
-      this.teamFilter = new TeamFilter(this.root, this.scoreData);
-      this.teamFilter.addChangeSubscriber(this);
-      let teamFilterItem = this.teamFilter.createTeamFilterItem();
-      if (teamFilterItem != null) {
-        filter.appendChild(teamFilterItem);
-      }
-      
-      this.scoreTypeFilter = new ScoreTypeFilter(this.root, this.scoreData);
-      this.scoreTypeFilter.addChangeSubscriber(this);
-      let scoreTypeFilterItem = this.scoreTypeFilter.createScoreTypeFilter();
-      if (scoreTypeFilterItem != null) {
-        filter.appendChild(scoreTypeFilterItem);
-      }
-      
-      this.weekFilter = new WeekRangeFilter(this.root, this.scoreData);
-      this.weekFilter.addChangeSubscriber(this);
-      let weekFilterItem = this.weekFilter.createWeekRange();
-      if (weekFilterItem != null) {
-        filter.appendChild(weekFilterItem);
-        // The jquery modification in this method has to be done after appending the child into the DOM,
-        // it doesn't work when doing it before adding it to the DOM.
-        this.weekFilter.customizeWeekRange();
-      }
-    })
+    let filter = document.createElement("div");
+    filter.id = "scoreDataFilter";
+    this.root.appendChild(filter);
+    
+    this.teamFilter = new TeamFilter(filter, this.scoreData);
+    this.teamFilter.addChangeSubscriber(this);
+    
+    this.scoreTypeFilter = new ScoreTypeFilter(filter, this.scoreData);
+    this.scoreTypeFilter.addChangeSubscriber(this);
+    
+    this.weekFilter = new WeekRangeFilter(filter, this.scoreData);
+    this.weekFilter.addChangeSubscriber(this);
   }
 }

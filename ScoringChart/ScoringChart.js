@@ -10,15 +10,16 @@ String.prototype.hashCode = function() {
 };
 
 class ScoringChart {
-  shadowRoot;
+  root;
   scoreData;
   pointsPerWin;
   chart;
   
-  constructor(shadowRoot, scoreData, pointsPerWin) {
-    this.shadowRoot = shadowRoot;
+  constructor(root, scoreData, pointsPerWin) {
+    this.root = root;
     this.scoreData = scoreData;
     this.pointsPerWin = pointsPerWin;
+    this.insertScoringChart();
   }
 
 shouldInvert(hash) {
@@ -49,44 +50,34 @@ intToRGB(i) {
 }
 
 insertScoringChart() {
-  console.log("in insertScoringChart");
-  $(document).ready(() => {
-    let existingChartRoot = this.shadowRoot.querySelector("#chartRoot");
-    
-    if (existingChartRoot != undefined) {
-      console.log("skipping insertScoringChart");
-      return
-    }
+  let chartRoot = document.createElement("div");
+  chartRoot.id = "chartRoot";
+  this.root.appendChild(chartRoot);
 
-    let chartRoot = document.createElement("div");
-    chartRoot.id = "chartRoot";
-    this.shadowRoot.appendChild(chartRoot);
-  
-    let chartContainer = document.createElement("div");
-    chartContainer.style = "position: relative; height:40vh; width:80vw";
-    chartContainer.innerHTML += `<canvas id="myChart" width="400" height="400"></canvas>`;
-    chartRoot.appendChild(chartContainer);
+  let chartContainer = document.createElement("div");
+  chartContainer.style = "position: relative; height:40vh; width:80vw";
+  chartContainer.innerHTML += `<canvas id="myChart" width="400" height="400"></canvas>`;
+  chartRoot.appendChild(chartContainer);
 
-    var ctx = this.shadowRoot.querySelector("#myChart").getContext('2d');
-    this.chart = new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels: [],
-        datasets: []
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        scales: {
-          yAxes: [{
-            ticks: {
-              // beginAtZero: true,
-              // max: 14
-            }
-          }]
-        }
+  var ctx = this.root.querySelector("#myChart").getContext('2d');
+  this.chart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: [],
+      datasets: []
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        yAxes: [{
+          ticks: {
+            // beginAtZero: true,
+            // max: 14
+          }
+        }]
       }
-    })
+    }
   })
 }
 

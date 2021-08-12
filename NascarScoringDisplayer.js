@@ -27,28 +27,33 @@ class NascarScoringDisplayer {
 
   async createScoreDisplay() {
     await this.getScoreData();
-    this.weeklyBreakdownTable = new WeeklyBreakdownContainer(this.root, this.scoreData, this.pointsPerWin);
-    this.chart = new ScoringChart(this.root, this.scoreData, this.pointsPerWin);
-    this.chart.insertScoringChart();
     
-    this.dataFilter = new ScoreDataFilter(this.root, this.scoreData);
+    let container = document.createElement("div");
+    container.id = "NascarScoringDisplayer";
+    this.root.appendChild(container);
+
+    this.weeklyBreakdownTable = new WeeklyBreakdownContainer(container, this.scoreData, this.pointsPerWin);
+    this.chart = new ScoringChart(container, this.scoreData, this.pointsPerWin);    
+    this.dataFilter = new ScoreDataFilter(container, this.scoreData);
+
     this.dataFilter.addChangeSubscriber(this.weeklyBreakdownTable);
     this.dataFilter.addChangeSubscriber(this.chart);
-    this.dataFilter.createScoreDataFilterItem();
 
-    if (!this.root.querySelector(".refreshScoresButton")) {
-      let refreshButton = document.createElement('button');
-      refreshButton.setAttribute("type", "button");
-      refreshButton.classList.add("refreshScoresButton");
-      refreshButton.innerHTML = "Refresh Score Data";
-      refreshButton.addEventListener("click", function() {
-        chrome.runtime.sendMessage({
-          action: "loadScores",
-          override: "true"
-        });
+    let refreshButton = document.createElement('button');
+    refreshButton.setAttribute("type", "button");
+    refreshButton.classList.add("refreshScoresButton");
+    refreshButton.innerHTML = "Refresh Score Data";
+    refreshButton.addEventListener("click", function() {
+      chrome.runtime.sendMessage({
+        action: "loadScores",
+        override: "true"
       });
-      this.root.appendChild(refreshButton);
-    }
+    });
+    container.appendChild(refreshButton);
+  }
+  
+  refreshDisplay() {
+    console.log("refreshing display");
   }
 }
   

@@ -14,16 +14,8 @@ class WeeklyBreakdownContainer {
     this.filterInfo = this.createDefaultFilterInfo(scoreData, false, false);
     this.defaultFilterInfo = this.createDefaultFilterInfo(scoreData, true, true);
 
-    let isFirstInstance = this.createItem(scoreData, pointsPerWin);
-    // This is a hack because the method gets called twice and 
-    // doesn't do anything the second time, so the toolbar isn't set up.
-    // The "if" shouldn't be necessary, but the stuff in the "else" should stay
-    if (!isFirstInstance) {
-      return;
-    }
-    else {
-      this.table.didUpdateScoreDataFilter(this.defaultFilterInfo);
-    }
+    this.createItem(scoreData, pointsPerWin);
+    this.table.didUpdateScoreDataFilter(this.defaultFilterInfo);
   }
   
   didUpdateScoreDataFilter(filterInfo) {
@@ -52,28 +44,14 @@ class WeeklyBreakdownContainer {
   }
   
   createItem(scoreData, pointsPerWin) {
-    console.log("abcabc createWeeklyBreakdownContainer");
-    let container = this.root.querySelector("#WeeklyBreakdownContainer");
-    
-    // There isn't a container yet, so create one
-    if (container == undefined) {
-      container = document.createElement("div");
-      container.id = "WeeklyBreakdownContainer";
-      this.root.appendChild(container);
-    }
-    // There is a container already and it's full, we don't need to do anything
-    else if (container.innerHTML != "") {
-      console.log("skipping createWeeklyBreakdownContainer");
-      return false;    
-    }
+    let container = document.createElement("div");
+    container.id = "WeeklyBreakdownContainer";
+    this.root.appendChild(container);
     
     this.table = new WeeklyBreakdownTable(container, scoreData, pointsPerWin, this.defaultFilterInfo);
-    this.table.createWeeklyBreakdownTable();
-
     this.toolbar = new WeeklyTableToolbar();
     this.toolbar.addChangeSubscriber(this);
     container.appendChild(this.toolbar.htmlItem);
-    return true
   }
   
   createDefaultFilterInfo(scoreData, includeTeams, includeANP) {

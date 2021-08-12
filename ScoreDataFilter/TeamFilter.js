@@ -6,6 +6,7 @@ class TeamFilter {
   constructor(root, scoreData) {
     this.root = root;
     this.scoreData = scoreData;
+    this.createTeamFilterItem();
   }
   
   addChangeSubscriber(subscriber) {
@@ -35,13 +36,10 @@ class TeamFilter {
   }
 
   createTeamFilterItem() {
-    if (this.root.querySelector("#teamFilter")) {
-      return null;
-    }
     let selectorRoot = document.createElement("div");
     selectorRoot.id = "teamFilter";
     
-    var listRoot = document.createElement("ul");
+    let listRoot = document.createElement("ul");
     selectorRoot.appendChild(listRoot);
     listRoot.classList.add("list-group", "team-filter-group");
     
@@ -71,7 +69,7 @@ class TeamFilter {
       listRoot.appendChild(teamOption);
     })
     
-    return selectorRoot
+    this.root.appendChild(selectorRoot);
   }
   
   handleTeamClick(teamOption) {

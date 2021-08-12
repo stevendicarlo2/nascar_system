@@ -4,20 +4,20 @@ if (!window.tableContentsHash) {
 }
 
 class WeeklyBreakdownTable {
-  shadowRoot;
+  root;
   scoreData;
   pointsPerWin;
   filterInfo;
   weeklyToolbarInfo;
-  tableElement;
   minMaxes;
   
-  constructor(shadowRoot, scoreData, pointsPerWin, filterInfo) {
-    this.shadowRoot = shadowRoot;
+  constructor(root, scoreData, pointsPerWin, filterInfo) {
+    this.root = root;
     this.scoreData = scoreData;
     this.pointsPerWin = pointsPerWin;
     this.filterInfo = filterInfo;
     this.minMaxes = this.getMinMaxes(this.convertScoreDataToTableStructure());
+    this.createWeeklyBreakdownTable();
   }
 
 async didUpdateScoreDataFilter(filterInfo) {
@@ -80,12 +80,10 @@ async didUpdateScoreDataFilter(filterInfo) {
   table.fixedColumns().relayout();
 }
 
-createWeeklyBreakdownTable(useNascarPoints = true) {
-  console.log("abcabc createWeeklyBreakdownTable");
-    
+createWeeklyBreakdownTable() {
   let container = document.createElement("div");
   container.id = "myDataTable";
-  this.shadowRoot.appendChild(container);
+  this.root.appendChild(container);
 
   let table = document.createElement("table");
   table.classList.add("table", "table-bordered", "table-sm");

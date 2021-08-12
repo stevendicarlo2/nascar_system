@@ -6,6 +6,7 @@ class WeekRangeFilter {
   constructor(root, scoreData) {
     this.root = root;
     this.scoreData = scoreData;
+    this.createWeekRange();
   }
 
   addChangeSubscriber(subscriber) {
@@ -26,10 +27,6 @@ class WeekRangeFilter {
   }
 
   createWeekRange() {
-    if (this.root.querySelector("#weekRangeRoot")) {
-      return null;
-    }
-
     let weekRangeRoot = document.createElement("div");
     weekRangeRoot.id = "weekRangeRoot";
     
@@ -37,7 +34,10 @@ class WeekRangeFilter {
     weekRange.classList.add("weekRange");
     weekRangeRoot.appendChild(weekRange);
     
-    return weekRangeRoot;
+    this.root.appendChild(weekRangeRoot)
+    // The jquery modification in this method has to be done after appending the child into the DOM,
+    // it doesn't work when doing it before adding it to the DOM.
+    this.customizeWeekRange();
   }
 
   customizeWeekRange() {
