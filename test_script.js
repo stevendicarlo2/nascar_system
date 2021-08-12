@@ -6,19 +6,6 @@ if (!window.sleep) {
 
 let nascarScoringDisplayer;
 
-async function showNascarDataWhenReady() {
-  await waitUntilHeaders();
-  console.log("done waiting until headers");
-  var newContents = document.querySelector(".Table__TBODY").innerHTML;
-  var newContentsHash = newContents.hashCode();
-  while (window.tableContentsHash == newContentsHash) {
-    newContents = document.querySelector(".Table__TBODY").innerHTML;
-    newContentsHash = newContents.hashCode();
-    await window.sleep(500);
-  }
-  showNascarData();
-}
-
 function showNascarData() {
   console.log("starting showNascarData");
   
@@ -41,7 +28,7 @@ chrome.runtime.onMessage.addListener(
   }
 );
 
-async function waitUntilHeaders() {
+async function waitUntilPageHTMLReady() {
   var headers = document.getElementsByClassName('Table__TR Table__TR--md Table__odd');
   while (headers.length === 0) {
     await window.sleep(500);
@@ -53,18 +40,14 @@ async function waitUntilHeaders() {
 
 async function onloadFunc() {
   console.log("in test script onloadFunc");
-  var selector = document.querySelector("select.dropdown__select");
-  while (!selector) {
-    await window.sleep(500);
-    selector = document.querySelector("select.dropdown__select");
-  }
-  await showNascarDataWhenReady();
-
+  await waitUntilPageHTMLReady();
+  showNascarData();
+  
+  let selector = document.querySelector("select.dropdown__select");
   if (selector.getAttribute("year-selector-change-listener") !== 'true') {
     selector.setAttribute("year-selector-change-listener", 'true');
     selector.addEventListener("change", function(e) {
       var newYear = e.target.value;
-      window.tableContentsHash = document.querySelector(".Table__TBODY").innerHTML.hashCode();
       chrome.runtime.sendMessage({
         action: "loadScores",
         year: newYear

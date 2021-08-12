@@ -1,8 +1,3 @@
-
-if (!window.tableContentsHash) {
-  window.tableContentsHash = 0;
-}
-
 class WeeklyBreakdownTable {
   root;
   scoreData;
