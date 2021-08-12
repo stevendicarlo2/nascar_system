@@ -4,6 +4,8 @@ if (!window.sleep) {
   }
 }
 
+let nascarScoringDisplayer;
+
 async function showNascarDataWhenReady() {
   await waitUntilHeaders();
   console.log("done waiting until headers");
@@ -26,7 +28,7 @@ function showNascarData() {
   existingStandingsTable.parentNode.insertBefore(shadowRoot, existingStandingsTable);
   shadowRoot.innerHTML = '<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.2/css/all.css">';  
 
-  let scoringObject = new NascarScoringDisplayer(shadowRoot);
+  nascarScoringDisplayer = new NascarScoringDisplayer(shadowRoot);
 }
 
 chrome.runtime.onMessage.addListener(
@@ -34,7 +36,7 @@ chrome.runtime.onMessage.addListener(
     console.log("got a message");
     console.log(request);
     if (request.action === "refreshDisplay") {
-      showNascarDataWhenReady();
+      nascarScoringDisplayer.refreshDisplay();
     }
   }
 );
@@ -62,7 +64,6 @@ async function onloadFunc() {
     selector.setAttribute("year-selector-change-listener", 'true');
     selector.addEventListener("change", function(e) {
       var newYear = e.target.value;
-      removeNascarData();
       window.tableContentsHash = document.querySelector(".Table__TBODY").innerHTML.hashCode();
       chrome.runtime.sendMessage({
         action: "loadScores",

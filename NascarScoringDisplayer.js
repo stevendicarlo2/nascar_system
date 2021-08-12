@@ -53,7 +53,9 @@ class NascarScoringDisplayer {
   }
   
   refreshDisplay() {
-    console.log("refreshing display");
+    let container = this.root.querySelector("#NascarScoringDisplayer");
+    this.root.removeChild(container);
+    this.createScoreDisplay();
   }
 }
   
