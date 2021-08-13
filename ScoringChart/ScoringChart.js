@@ -55,8 +55,8 @@ insertScoringChart() {
   this.root.appendChild(chartRoot);
 
   let chartContainer = document.createElement("div");
-  chartContainer.style = "position: relative; height:40vh; width:80vw";
-  chartContainer.innerHTML += `<canvas id="myChart" width="400" height="400"></canvas>`;
+  chartContainer.style = "position: relative; height:40vh; width:100%";
+  chartContainer.innerHTML += `<canvas id="myChart"></canvas>`;
   chartRoot.appendChild(chartContainer);
 
   var ctx = this.root.querySelector("#myChart").getContext('2d');
