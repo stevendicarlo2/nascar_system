@@ -4,14 +4,12 @@ class WeeklyBreakdownTable {
   pointsPerWin;
   filterInfo;
   weeklyToolbarInfo;
-  minMaxes;
   
   constructor(root, scoreData, pointsPerWin, filterInfo) {
     this.root = root;
     this.scoreData = scoreData;
     this.pointsPerWin = pointsPerWin;
     this.filterInfo = filterInfo;
-    this.minMaxes = this.getMinMaxes(this.convertScoreDataToTableStructure());
     this.createWeeklyBreakdownTable();
   }
 
@@ -178,7 +176,12 @@ createColumnDefinitionsForTable() {
 
 renderMethodTotalField(teamData, scoreType, useOpponentScore) {
   let total = 0;
+  let weekMin = this.filterInfo.weekFilterInfo.weekMin;
+  let weekMax = this.filterInfo.weekFilterInfo.weekMax;
   for (let week in teamData.weeklyInfo) {
+    if (week < weekMin - 1 || week > weekMax - 1) {
+      continue;
+    }
     let weekData = teamData.weeklyInfo[week];
     if (scoreType === PointsTypeEnum.np) {
       if (useOpponentScore) {
@@ -276,11 +279,18 @@ getMinMaxes(teamInfos) {
   let maxScore=0, maxTotalScore=0, maxNP=0, maxTotalNP=0, maxANP=0, maxTotalANP=0;
   let minScore, minTotalScore, minNP, minTotalNP, minANP, minTotalANP;
 
+  let weekMin = this.filterInfo.weekFilterInfo.weekMin;
+  let weekMax = this.filterInfo.weekFilterInfo.weekMax;
+
   teamInfos.forEach((teamInfo) => {
     let weeklyInfo = teamInfo.weeklyInfo;
     let teamTotalNP=0, teamTotalANP=0, teamTotalScore=0;
 
     for (let week in weeklyInfo) {
+      if (week < weekMin - 1 || week > weekMax - 1) {
+        continue;
+      }
+
       let score = weeklyInfo[week].score;
       let nascarPoints = weeklyInfo[week].nascar_points;
       let adjNascarPoints = nascarPoints + this.pointsPerWin * weeklyInfo[week].wins;
@@ -334,7 +344,7 @@ getMinMaxes(teamInfos) {
 }
 
 highlightTable() {
-  let minMaxes = this.minMaxes;
+  let minMaxes = this.getMinMaxes(this.convertScoreDataToTableStructure());
 
   let badColor = "#fe7575";
   let mediumColor = "#ffff88";
