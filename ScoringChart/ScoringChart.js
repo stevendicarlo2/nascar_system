@@ -70,12 +70,27 @@ insertScoringChart() {
       responsive: true,
       maintainAspectRatio: false,
       scales: {
-        yAxes: [{
-          ticks: {
-            // beginAtZero: true,
-            // max: 14
+        yAxes: [
+          {
+            id: "nascarAxis",
+            scaleLabel: {
+              display: true,
+              labelString: "NP/ANP"
+            }
+          },
+          {
+            id: "rawPointAxis",
+            display: "auto",
+            position: "right",
+            gridLines: {
+              display: false
+            },
+            scaleLabel: {
+              display: true,
+              labelString: "POINTS"
+            }
           }
-        }]
+        ]
       }
     }
   })
@@ -97,15 +112,18 @@ updateScoringChart(filterInfo) {
     let teamColor = "#" + this.intToRGB(team.hashCode());
     
     filterInfo.scoreTypeFilterInfo.selectedPointTypes.forEach((selectedPointType, pointTypeIndex) => {
-      let labelAnnotation;
+      let labelAnnotation, axis;
       if (selectedPointType === PointsTypeEnum.np) {
         labelAnnotation = "NP";
+        axis = "nascarAxis";
       }
       else if (selectedPointType === PointsTypeEnum.anp) {
         labelAnnotation = "ANP";
+        axis = "nascarAxis";
       }
       else if (selectedPointType === PointsTypeEnum.points) {
         labelAnnotation = "POINTS";
+        axis = "rawPointAxis";
       }
       
       let borderDash;
@@ -120,6 +138,7 @@ updateScoringChart(filterInfo) {
       }
       var dataSet = {
         label: team + " " + labelAnnotation,
+        yAxisID: axis,
         borderColor: teamColor,
         borderWidth: 5,
         borderDash: borderDash,
