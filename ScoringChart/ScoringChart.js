@@ -13,19 +13,18 @@ class ScoringChart {
   root;
   scoreData;
   pointsPerWin;
+  colorMap;
   chart;
   
   constructor(root, scoreData, pointsPerWin) {
     this.root = root;
     this.scoreData = scoreData;
     this.pointsPerWin = pointsPerWin;
+    this.colorMap = this.createColorMap();
     this.insertScoringChart();
   }
 
-shouldInvert(hash) {
-  let r = (hash & 0x00FF0000) >> 16;
-  let g = (hash & 0x0000FF00) >> 8;
-  let b = (hash & 0x000000FF) >> 0;
+shouldInvert(r, g, b) {
   let brightness = (299*r + 587*g + 114*b) / 1000;
   // (the hardcoded value is Annie's because it's ugly)
   return (brightness > 230 || brightness == 143.398);
@@ -35,18 +34,78 @@ invertHex(hex) {
   return (Number(`0x1${hex}`) ^ 0xFFFFFF).toString(16).substr(1).toUpperCase()
 }
 
-intToRGB(i) {
-  let c = (i & 0x00FFFFFF)
-    .toString(16)
-    .toUpperCase();
+rgbToHexString(r, g, b) {
+  let intValue = Math.round(r << 16) + Math.round(g << 8) + Math.round(b);
+  let unpadded = intValue.toString(16).toUpperCase();
+  let padded = "00000".substring(0, 6 - unpadded.length) + unpadded;
+  return "#" + padded;
+}
 
-  let rgbString = "00000".substring(0, 6 - c.length) + c;
-  if (this.shouldInvert(i)) {
-    return this.invertHex(rgbString);
+intToColorObject(i) {
+  let r = (i & 0x00FF0000) >> 16;
+  let g = (i & 0x0000FF00) >> 8;
+  let b = (i & 0x000000FF) >> 0;
+  
+  if (this.shouldInvert(r, g, b)) {
+    r = 255 - r;
+    g = 255 - g;
+    b = 255 - b;
   }
-  else {
-    return rgbString;
+  
+  let identifier = this.rgbToHexString(r, g, b);
+  let color = d3.lab(identifier);
+  return color;
+}
+
+doesColorResembleExistingColors(color, existingColors) {
+  let result = existingColors.filter((existingColor) => {
+    let deltaE = this.deltaE(color, existingColor);
+    return deltaE < 40;
+  })
+  
+  return result.length > 0;
+}
+
+deltaE(color1, color2) {
+  let L = (color1.l - color2.l)**2;
+  let A = (color1.a - color2.a)**2;
+  let B = (color1.b - color2.b)**2;
+  return (L + A + B) ** (1/2);
+}
+
+createColorMap() {
+  let colorMap = {};
+  for (let teamName in this.scoreData.totals) {
+    let hashModifier = "";
+    let modifiedTeamName = "";
+    let acceptableNewColor = false;
+    let color;
+    
+    // Continues this loop until the color is sufficiently different from all others
+    while (!acceptableNewColor) {
+      // Modifies the team name to get a new color seed
+      modifiedTeamName = teamName + hashModifier;
+      // Gets a new color based on the modified name
+      color = this.intToColorObject(modifiedTeamName.hashCode());
+      
+      // If this has been going on for too long, just stop
+      if (hashModifier.length > 100) {
+        acceptableNewColor = true;
+      }
+      // Otherwise, if the color resembles existing colors, change the hash modifier
+      else if (this.doesColorResembleExistingColors(color, Object.values(colorMap))) {
+        hashModifier += "a";
+      }
+      // Otherwise, break out of this loop
+      else {
+        acceptableNewColor = true;
+      }
+    }
+    
+    colorMap[teamName] = color;
   }
+  
+  return colorMap;
 }
 
 insertScoringChart() {
@@ -109,7 +168,9 @@ updateScoringChart(filterInfo) {
   
   var chartDataSets = []
   for (let team in filteredScoreData.totals) {
-    let teamColor = "#" + this.intToRGB(team.hashCode());
+    let color = d3.rgb(this.colorMap[team]);
+    let teamColor = this.rgbToHexString(color.r, color.g, color.b);
+    let oppTeamColor = teamColor + "66";    
     
     filterInfo.scoreTypeFilterInfo.selectedPointTypes.forEach((selectedPointType, pointTypeIndex) => {
       let labelAnnotation, axis;
@@ -147,7 +208,7 @@ updateScoringChart(filterInfo) {
       }
       var opponentDataSet = {
         label: team + " OPP " + labelAnnotation,
-        borderColor: teamColor + "66",
+        borderColor: oppTeamColor,
         borderWidth: 5,
         borderDash: borderDash,
         fill: false,
