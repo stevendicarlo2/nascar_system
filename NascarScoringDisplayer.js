@@ -41,7 +41,7 @@ class NascarScoringDisplayer {
 
     let refreshButton = document.createElement('button');
     refreshButton.setAttribute("type", "button");
-    refreshButton.classList.add("refreshScoresButton");
+    refreshButton.classList.add("btn", "btn-secondary");
     refreshButton.innerHTML = "Refresh Score Data";
     refreshButton.addEventListener("click", function() {
       chrome.runtime.sendMessage({

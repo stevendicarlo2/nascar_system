@@ -42,7 +42,7 @@ class ButtonItem {
     button.setAttribute("value", this.value);
     button.setAttribute("type", "button");
     button.setAttribute("data-toggle", "button");
-    button.classList.add("btn", "btn-secondary");
+    button.classList.add("btn", "btn-secondary", "shadow-none");
 
     button.onclick = () => {
       if (this.isSelected()) {

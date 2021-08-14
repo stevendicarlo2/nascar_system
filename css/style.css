@@ -1,20 +1,10 @@
-.refreshScoresButton {
-  -webkit-transition-duration: 0.4s; /* Safari */
-  transition-duration: 0.4s;
-  border-radius: 16px;
-  background-color: #e7e7e7;
-  color: black;
-  font-size: 12px;
-  padding: 8px 16px;
-}
-
-.refreshScoresButton:hover {
-  background-color: white;
-}
-
 .shadowRoot {
   width: 95%;
   margin-left: 2.5%;
+}
+
+.btn.btn-secondary:hover {
+  background-color: rgb(98, 107, 115);
 }
 
 /* This makes sure the data rows are all one line, don't wrap to the next line */
@@ -22,6 +12,7 @@ table.dataTable td {
   white-space: nowrap;
 }
 
+/* This makes sure the header rows are all one line, don't wrap to the next line */
 table.dataTable th {
   white-space: nowrap;
 }

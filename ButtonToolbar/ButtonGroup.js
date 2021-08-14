@@ -68,7 +68,7 @@ class ButtonGroup {
 
   createItem(config) {
     let buttonGroup = document.createElement("div");
-    buttonGroup.classList.add("btn-group");
+    buttonGroup.classList.add("btn-group", "mr-1");
     buttonGroup.setAttribute("role", "group");
     
     let createdButtons = [];

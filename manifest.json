@@ -14,12 +14,12 @@
       {
         "matches": ["https://fantasy.espn.com/football/league*"],
         "css": [
-          "css/style.css", 
           "css/datatables.min.css",
           "css/myBootstrap.css", 
           "jquery-ui-1.12.1/jquery-ui.min.css", 
           "jquery-ui-1.12.1/jquery-ui.structure.min.css", 
-          "jquery-ui-1.12.1/jquery-ui.theme.min.css"
+          "jquery-ui-1.12.1/jquery-ui.theme.min.css",
+          "css/style.css"
         ],
         "js": [ 
           "ButtonToolbar/ButtonItem.js",
