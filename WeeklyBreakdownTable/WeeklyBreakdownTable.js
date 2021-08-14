@@ -92,6 +92,7 @@ createWeeklyBreakdownTable() {
     dataTable = $('#weekly_breakdown_table').DataTable({
       searching: false,
       paging: false,
+      info: false,
       data: tableData,
       columns: columns,
       order: [2, "desc"],
