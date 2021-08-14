@@ -19,16 +19,41 @@ class WeeklyBreakdownContainer {
   }
   
   didUpdateScoreDataFilter(filterInfo) {
-    filterInfo.selectedInfo = this.toolbar.weeklyToolbarInfo.selectedInfo;
     this.filterInfo = filterInfo;
-    this.toolbar.updateScoreTypeFilterInfo(filterInfo.scoreTypeFilterInfo);
+    this.filterInfo.selectedInfo = this.toolbar.weeklyToolbarInfo.selectedInfo;
+    
+    // If the selected pointType is no longer available because the scoreTypeFilterInfo changed,
+    // then change the selectedInfo to what is now available.
+    if (!this.filterInfo.scoreTypeFilterInfo.selectedPointTypes.includes(this.filterInfo.selectedInfo.pointType)) {
+      let firstSelectedPointType = this.filterInfo.scoreTypeFilterInfo.selectedPointTypes[0];
+      // If none are selected, just use NP
+      if (!firstSelectedPointType) {
+        firstSelectedPointType = PointsTypeEnum.np;
+      }
+      this.filterInfo.selectedInfo.pointType = firstSelectedPointType;
+    }
+    // If the filters include only the opponent score, make that the selected one
+    if (
+      !this.filterInfo.scoreTypeFilterInfo.includeTeamScore &&
+      this.filterInfo.scoreTypeFilterInfo.includeOpponentScore
+    ) {
+      this.filterInfo.selectedInfo.teamScoreType = "oppScore";
+    }
+    // Otherwise, if the opponent score isn't selected (whether or not the team score is),
+    // it should default to showing the teamScore
+    else if (!this.filterInfo.scoreTypeFilterInfo.includeOpponentScore) {
+      this.filterInfo.selectedInfo.teamScoreType = "teamScore";
+    }
+
+    // Now this method just updates the necessary elements with the updated filterInfo
+    this.toolbar.updateScoreTypeFilterInfo(this.filterInfo.scoreTypeFilterInfo);
     this.refreshWeeklyTableToolbarHTMLItem();
     
     if (this.toolbar.weeklyToolbarInfo.useDefault) {
       this.table.didUpdateScoreDataFilter(this.defaultFilterInfo);
     }
     else {
-      this.table.didUpdateScoreDataFilter(filterInfo);
+      this.table.didUpdateScoreDataFilter(this.filterInfo);
     }
   }
   
