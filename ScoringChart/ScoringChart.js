@@ -208,6 +208,7 @@ updateScoringChart(filterInfo) {
       }
       var opponentDataSet = {
         label: team + " OPP " + labelAnnotation,
+        yAxisID: axis,
         borderColor: oppTeamColor,
         borderWidth: 5,
         borderDash: borderDash,
