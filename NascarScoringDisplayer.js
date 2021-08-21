@@ -36,6 +36,7 @@ class NascarScoringDisplayer {
     this.chart = new ScoringChart(container, this.scoreData, this.pointsPerWin);    
     this.dataFilter = new ScoreDataFilter(container, this.scoreData);
 
+    this.weeklyBreakdownTable.addChangeSubscriber(this.chart);
     this.dataFilter.addChangeSubscriber(this.weeklyBreakdownTable);
     this.dataFilter.addChangeSubscriber(this.chart);
 

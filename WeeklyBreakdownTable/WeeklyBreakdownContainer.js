@@ -8,6 +8,7 @@ class WeeklyBreakdownContainer {
   // This is used for the default table that has all the teams 
   // and displays NP and ANP
   defaultFilterInfo;
+  changeSubscribers = [];
   
   constructor(root, scoreData, pointsPerWin) {
     this.root = root;
@@ -16,6 +17,26 @@ class WeeklyBreakdownContainer {
 
     this.createItem(scoreData, pointsPerWin);
     this.table.didUpdateScoreDataFilter(this.defaultFilterInfo);
+  }
+  
+  addChangeSubscriber(subscriber) {
+    this.changeSubscribers.push(subscriber);
+  }
+
+  notifySubscribersWeeklyTableUpdate() {
+    this.changeSubscribers.forEach((subscriber) => {
+      subscriber.didFinishDisplayingWeeklyTable();
+    });
+  }
+  
+  notifySubscribersWeeklyToolbarUpdate() {
+    this.changeSubscribers.forEach((subscriber) => {
+      subscriber.didUpdateWeeklyTableToolbar();
+    });
+  }
+  
+  didFinishDisplayingWeeklyTable() {
+    this.notifySubscribersWeeklyTableUpdate();
   }
   
   didUpdateScoreDataFilter(filterInfo) {
@@ -58,6 +79,7 @@ class WeeklyBreakdownContainer {
   }
   
   didUpdateWeeklyTableToolbar() {
+    this.notifySubscribersWeeklyToolbarUpdate();
     this.didUpdateScoreDataFilter(this.filterInfo);
   }
   
@@ -74,6 +96,7 @@ class WeeklyBreakdownContainer {
     this.root.appendChild(container);
     
     this.table = new WeeklyBreakdownTable(container, scoreData, pointsPerWin, this.defaultFilterInfo);
+    this.table.addChangeSubscriber(this);
     this.toolbar = new WeeklyTableToolbar();
     this.toolbar.addChangeSubscriber(this);
     container.appendChild(this.toolbar.htmlItem);

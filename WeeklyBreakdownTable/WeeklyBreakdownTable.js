@@ -4,6 +4,7 @@ class WeeklyBreakdownTable {
   pointsPerWin;
   filterInfo;
   weeklyToolbarInfo;
+  changeSubscribers = [];
   
   constructor(root, scoreData, pointsPerWin, filterInfo) {
     this.root = root;
@@ -11,6 +12,16 @@ class WeeklyBreakdownTable {
     this.pointsPerWin = pointsPerWin;
     this.filterInfo = filterInfo;
     this.createWeeklyBreakdownTable();
+  }
+  
+  addChangeSubscriber(subscriber) {
+    this.changeSubscribers.push(subscriber);
+  }
+
+  notifySubscribers() {
+    this.changeSubscribers.forEach((subscriber) => {
+      subscriber.didFinishDisplayingWeeklyTable();
+    });
   }
 
 async didUpdateScoreDataFilter(filterInfo) {
@@ -71,6 +82,8 @@ async didUpdateScoreDataFilter(filterInfo) {
   
   this.highlightTable();
   table.fixedColumns().relayout();
+  
+  this.notifySubscribers();
 }
 
 createWeeklyBreakdownTable() {

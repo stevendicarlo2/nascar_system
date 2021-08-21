@@ -15,6 +15,13 @@ class ScoringChart {
   pointsPerWin;
   colorMap;
   chart;
+  // This is used to make sure the chart stays in place even when the 
+  // table above it changes height.
+  // {
+  //   filterOffset: Int
+  //   scrollOffset: Int
+  // }
+  storedScrollInfo
   
   constructor(root, scoreData, pointsPerWin) {
     this.root = root;
@@ -153,6 +160,8 @@ insertScoringChart() {
       }
     }
   })
+  
+  this.updateScrollInfo();
 }
 
 updateScoringChart(filterInfo) {
@@ -282,7 +291,33 @@ getFilteredScoreData(filterInfo) {
   return copiedScoreData;
 }
 
+updateScrollInfo() {
+  let chartElement = document.querySelector("#chartRoot");
+  this.storedScrollInfo = {
+    filterOffset: chartElement.offsetTop,
+    scrollOffset: window.scrollY
+  }
+}
+
 didUpdateScoreDataFilter(filterInfo) {
+  this.updateScrollInfo();
   this.updateScoringChart(filterInfo);
+}
+
+didUpdateWeeklyTableToolbar() {
+  this.updateScrollInfo();
+}
+
+// After updating the weekly table, this scrolls the screen so that 
+// the chart is in the same position as before.
+// This has the effect of making the table look like it grows upwards
+// rather than downwards, which is visually smoother
+didFinishDisplayingWeeklyTable() {
+  let chartElement = document.querySelector("#chartRoot");
+  let newFilterOffset = chartElement.offsetTop;
+  let filterPositionChange = newFilterOffset - this.storedScrollInfo.filterOffset;
+  let desiredScrollPosition = this.storedScrollInfo.scrollOffset + filterPositionChange;
+  
+  window.scrollTo(window.scrollX, desiredScrollPosition);
 }
 }
