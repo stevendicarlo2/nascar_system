@@ -4,7 +4,7 @@
     "description": "A better way to play fantasy",
     "permissions": ["storage", "webNavigation", "cookies", "*://fantasy.espn.com/", "*://fantasy.espn.com", "tabs"],
     "background": {
-      "scripts": ["jquery-3.4.1.min.js", "background.js"],
+      "scripts": ["background.js"],
       "persistent": false
     },
     "browser_action": {
@@ -33,11 +33,11 @@
           "WeeklyBreakdownTable/WeeklyTableToolbar.js", 
           "WeeklyBreakdownTable/WeeklyBreakdownTable.js", 
           "WeeklyBreakdownTable/WeeklyBreakdownContainer.js", 
-          "NascarScoringDisplayer.js",
-          "inject_link.js",  
-          "jquery-3.4.1.min.js", 
+          "NascarScoringDisplayer/NascarScoringDisplayer.js",
+          "core/inject_link.js",  
+          "jquery/jquery-3.4.1.min.js", 
           "datatables/datatables.min.js", 
-          "datatables/d3.min.js", 
+          "d3/d3.min.js", 
           "chart/Chart.min.js", 
           "jquery-ui-1.12.1/jquery-ui.min.js"
         ]

@@ -95,7 +95,7 @@ function loadScores(year, override) {
           tabID = tab.id;
           console.log("seasonID: " + seasonId.toString());
           chrome.tabs.executeScript(tab.id, { code: "var seasonId = " + seasonId.toString() }, function() {
-            chrome.tabs.executeScript(tab.id, { file: "getScheduleData.js" })
+            chrome.tabs.executeScript(tab.id, { file: "core/getScheduleData.js" })
           });
         });
       } else {
@@ -150,6 +150,6 @@ chrome.runtime.onMessage.addListener(
 chrome.webNavigation.onHistoryStateUpdated.addListener(function(details) {
   if (details.url.includes("https://fantasy.espn.com/football/league/standings")) {
     console.log("navigated to standings");
-    chrome.tabs.executeScript(null,{file:"test_script.js"});
+    chrome.tabs.executeScript(null,{file:"core/test_script.js"});
   }
 });
