@@ -1,6 +1,6 @@
 class NascarScoringDisplayer {
   root;
-  weeklyBreakdownTable;
+  weeklyBreakdownContainer;
   scoringChart;
   dataFilter;
   scoreData;
@@ -32,12 +32,12 @@ class NascarScoringDisplayer {
     container.id = "NascarScoringDisplayer";
     this.root.appendChild(container);
 
-    this.weeklyBreakdownTable = new WeeklyBreakdownContainer(container, this.scoreData, this.pointsPerWin);
+    this.weeklyBreakdownContainer = new WeeklyBreakdownContainer(container, this.scoreData, this.pointsPerWin);
     this.chart = new ScoringChart(container, this.scoreData, this.pointsPerWin);    
     this.dataFilter = new ScoreDataFilter(container, this.scoreData);
 
-    this.weeklyBreakdownTable.addChangeSubscriber(this.chart);
-    this.dataFilter.addChangeSubscriber(this.weeklyBreakdownTable);
+    this.weeklyBreakdownContainer.addChangeSubscriber(this.chart);
+    this.dataFilter.addChangeSubscriber(this.weeklyBreakdownContainer);
     this.dataFilter.addChangeSubscriber(this.chart);
 
     let refreshButton = document.createElement('button');
